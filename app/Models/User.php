@@ -32,4 +32,8 @@ class User extends Authenticatable
         return JWTAuth::fromUser($this, ['exp' => strtotime('+1 year'), 'user_id' => $this->id]);
     }
 
+    public function Application() {
+      return $this->hasOne('App\Models\Application');
+    }
+
 }

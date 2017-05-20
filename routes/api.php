@@ -15,4 +15,9 @@ use Illuminate\Http\Request;
 Route::group(['prefix' => 'user'], function() {
 	Route::post('register', 'AuthController@register');
 	Route::post('auth', 'AuthController@login');
+
+	Route::group(['middleware' => 'jwt.auth'], function() {
+		Route::post('apply', 'ApplicationController@createApplication');
+	});
+
 });
