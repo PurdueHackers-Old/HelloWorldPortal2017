@@ -7,6 +7,7 @@ use Validator;
 use App\Models\User;
 use Hash;
 use Auth;
+use App\Models\Role;
 
 class AuthController extends Controller
 {
@@ -51,12 +52,18 @@ class AuthController extends Controller
         return ['message' => 'validation', 'errors' => $validator->errors()];
     }
 
+    $baseRole = Role::where('name','user')->first();
+    if(count($baseRole) == 0) {
+      return response()->json(['message' => 'internal_role_error'], 500);
+    }
     $user = new User;
     $user->firstname = $request->firstname;
     $user->lastname = $request->lastname;
     $user->password = Hash::make($request->password);
     $user->email = $request->email;
     $user->save();
+
+    $user->roles()->attach($baseRole->id);
     $token = $user->getToken();
 
     return ['message' => 'success', 'token' => $token];
