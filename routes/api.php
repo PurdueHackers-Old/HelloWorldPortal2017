@@ -14,8 +14,12 @@ use Illuminate\Http\Request;
 */
 Route::post('user/register', 'AuthController@register');
 Route::post('user/auth', 'AuthController@login');
+Route::post('user/requestPasswordReset', 'AuthController@sendPasswordReset');
+Route::post('user/confirmPasswordReset', 'AuthController@performPasswordReset');
 
 Route::group(['middleware' => 'jwt.auth'], function() {
 	Route::post('user/apply', 'ApplicationController@createApplication');
 	Route::get('applications', 'ApplicationController@getApplications');
 });
+
+//TODO- Day-Of (announcements, tech talks, etc...)

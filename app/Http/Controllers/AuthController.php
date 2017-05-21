@@ -8,6 +8,8 @@ use App\Models\User;
 use Hash;
 use Auth;
 use App\Models\Role;
+use App\Models\PasswordReset;
+use Carbon\Carbon;
 
 class AuthController extends Controller
 {
@@ -24,13 +26,13 @@ class AuthController extends Controller
       'password'   => 'required',
     ]);
     if ($validator->fails()) {
-        return ['message' => 'validation', 'errors' => $validator->errors()];
+      return ['message' => 'validation', 'errors' => $validator->errors()];
     }
     $email = $request->email;
     $field = filter_var($email, FILTER_VALIDATE_EMAIL) ? 'email' : 'name';
     if (Auth::attempt([$field => $email, 'password' => $request->password])) {
-        $token = Auth::user()->getToken();
-        return ['message' => 'success', 'token' => $token];
+      $token = Auth::user()->getToken();
+      return ['message' => 'success', 'token' => $token];
     }
     return response()->json(['message' => 'invalid_credentials'], 401);
   }
@@ -49,7 +51,7 @@ class AuthController extends Controller
       'password'    => 'required',
     ]);
     if ($validator->fails()) {
-        return ['message' => 'validation', 'errors' => $validator->errors()];
+      return ['message' => 'validation', 'errors' => $validator->errors()];
     }
 
     $baseRole = Role::where('name','user')->first();
@@ -67,5 +69,49 @@ class AuthController extends Controller
     $token = $user->getToken();
 
     return ['message' => 'success', 'token' => $token];
+  }
+
+  //Request password reset token
+  public function sendPasswordReset(Request $request) {
+    $validator = Validator::make($request->all(), [
+      'email' => 'required|email|exists:users,email',
+    ]);
+    if ($validator->fails()) {
+      return ['message' => 'error', 'errors' => $validator->errors()->all()];
+    }
+    $user = User::where('email', $request->email)->first();
+    $user->sendPasswordResetEmail();
+    return ['message' => 'success'];
+  }
+
+  //Confirm password reset
+  public function performPasswordReset(Request $request) {
+    $validator = Validator::make($request->all(), [
+      'token' => 'required',
+      'password' => 'required',
+    ]);
+    if ($validator->fails()) {
+      return ['message' => 'validation', 'errors' => $validator->errors()];
+    }
+
+    $token = $request->token;
+    $password = $request->password;
+
+    $reset = PasswordReset::where('token', $token)->first();
+    if(count($reset) < 1) {
+      return ['message' => 'invalid_token'];
+    }
+
+    if (Carbon::parse($reset->created_at)->addHour(48)->lte(Carbon::now())) {
+      return ['message' => 'expired'];
+    }
+
+    $user = $reset->User;
+    $user->password = Hash::make($password);
+    $user->save();
+
+    $reset->delete();
+
+    return ['message' => 'success'];
   }
 }
