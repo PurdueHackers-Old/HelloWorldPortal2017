@@ -9,3 +9,10 @@ Homestead.json
 Homestead.yaml
 npm-debug.log
 .env
+
+.DS_Store
+*.orig
+/*.log
+/public/node_modules
+/public/dist
+/public/bower_components
