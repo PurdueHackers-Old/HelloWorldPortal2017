@@ -53,7 +53,7 @@ class User extends Authenticatable
         $user = $this;
 
         //Send Emails
-        Mail::to($user)->send(new \App\Mail\PasswordReset($token));
+        Mail::to($user)->queue(new \App\Mail\PasswordReset($token));
       }
 
 }

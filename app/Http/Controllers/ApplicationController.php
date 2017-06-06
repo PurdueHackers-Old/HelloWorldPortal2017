@@ -106,15 +106,15 @@ class ApplicationController extends Controller
       switch($app->status) {
         case "accepted":
           Log::debug("Sent acceptance email for application" . $app->id . " and userID: " . $app->user->id);
-          Mail::to($app->user)->send(new \App\Mail\AcceptedMail($app));
+          Mail::to($app->user)->queue(new \App\Mail\AcceptedMail($app));
           break;
         case "waitlisted":
           Log::debug("Sent waitlist email for application" . $app->id . " and userID: " . $app->user->id);
-          Mail::to($app->user)->send(new \App\Mail\WaitlistedMail($app));
+          Mail::to($app->user)->queue(new \App\Mail\WaitlistedMail($app));
           break;
         case "rejected":
           Log::debug("Sent reject email for application" . $app->id . " and userID: " . $app->user->id);
-          Mail::to($app->user)->send(new \App\Mail\RejectedMail($app));
+          Mail::to($app->user)->queue(new \App\Mail\RejectedMail($app));
           break;
         default:
           Log::debug("Unknown status for app with id " . $app->id . " and status: " . $app->status);
