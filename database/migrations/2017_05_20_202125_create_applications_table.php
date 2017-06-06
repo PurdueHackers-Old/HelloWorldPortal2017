@@ -22,6 +22,8 @@ class CreateApplicationsTable extends Migration
 
           $table->string('sampleQuestion');
           $table->string('status');
+          $table->timestamp('emailSent')->nullable();
+          $table->string('last_email_status');
           $table->timestamps();
       });
     }
