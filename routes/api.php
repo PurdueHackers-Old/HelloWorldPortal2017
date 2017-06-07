@@ -20,6 +20,9 @@ Route::post('user/confirmPasswordReset', 'AuthController@performPasswordReset');
 Route::group(['middleware' => 'jwt.auth'], function() {
 	Route::post('user/apply', 'ApplicationController@createApplication');
 	Route::get('applications', 'ApplicationController@getApplications');
+	Route::get('applications/{application_id}', 'ApplicationController@getSingleApplication');
+	Route::post('applications/{application_id}/setStatus', 'ApplicationController@setApplicationStatus');
+	Route::post('sendApplicationEmails', 'ApplicationController@sendApplicationEmails');
 });
 
-//TODO- Day-Of (announcements, tech talks, etc...)
+//TODO- Day-Of (announcements, tech talks, checkin, etc...)
