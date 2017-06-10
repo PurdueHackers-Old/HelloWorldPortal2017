@@ -29,8 +29,7 @@ class AuthController extends Controller
       return ['message' => 'validation', 'errors' => $validator->errors()];
     }
     $email = $request->email;
-    $field = filter_var($email, FILTER_VALIDATE_EMAIL) ? 'email' : 'name';
-    if (Auth::attempt([$field => $email, 'password' => $request->password])) {
+    if (Auth::attempt(['email' => $email, 'password' => $request->password])) {
       $token = Auth::user()->getToken();
       return ['message' => 'success', 'token' => $token];
     }

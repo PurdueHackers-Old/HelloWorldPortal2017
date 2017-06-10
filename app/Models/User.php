@@ -30,7 +30,19 @@ class User extends Authenticatable
     ];
 
     public function getToken() {
-        return JWTAuth::fromUser($this, ['exp' => strtotime('+1 year'), 'user_id' => $this->id]);
+        $roles = $this->roles;
+        $formattedRoles = [];
+        foreach($roles as $role) {
+          array_push($formattedRoles,$role->name);
+        }
+        return JWTAuth::fromUser($this, [
+          'exp' => strtotime('+1 year'),
+          'user_id' => $this->id,
+          'email' => $this->email,
+          'firstname' => $this->firstname,
+          'lastname' => $this->lastname,
+          'roles' => $formattedRoles
+        ]);
     }
 
     public function Application() {
