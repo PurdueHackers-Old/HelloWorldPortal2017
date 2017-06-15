@@ -57,6 +57,37 @@ class ApplicationController extends Controller
 
   }
 
+  //Updates an existing application
+  public function updateApplication(Request $request) {
+    //Validate input, but don't require any field in particular
+    $validator = Validator::make($request->all(), [
+      'sampleQuestion' => 'max:127',
+    ]);
+    
+    if ($validator->fails()) {
+        return response()->json(['message' => 'validation', 'errors' => $validator->errors()],400);
+    }
+
+
+    //Make sure user has already applied
+    $application = Auth::user()->application;
+    if($application == null || count($application) == 0) {
+      return response()->json(['message' => 'application_does_not_exist'],400);
+    }
+
+    //Update any attributes which were provided
+    $data = $request->only(['sampleQuestion']);
+    foreach($data as $key => $value) {
+      if($value != null) {
+        $application->$key = $value;
+      }
+    }
+
+    $application->save();
+    return response()->json(['message' => 'success','application' => $application],200);
+
+  }
+
   public function setApplicationStatus(Request $request, $application_id) {
     //User must be an admin to view applications
     if(!PermissionsController::hasRole('admin')) {
@@ -92,35 +123,5 @@ class ApplicationController extends Controller
     return $application->with('user')->get();
   }
 
-  public function sendApplicationEmails(Request $request) {
-    //User must be an admin to view applications
-    if(!PermissionsController::hasRole('admin')) {
-      return response()->json(['message' => 'insufficient_permissions']);
-    }
 
-    //Grab all applications which have not been emailed out already AND that are not pending
-    $applicationsToSend = Application::where('last_email_status','none')->where('status','!=','pending')->with('user')->get();
-    foreach($applicationsToSend as $app) {
-      $app->last_email_status = $app->status;
-      $app->save();
-      switch($app->status) {
-        case "accepted":
-          Log::debug("Sent acceptance email for application" . $app->id . " and userID: " . $app->user->id);
-          Mail::to($app->user)->queue(new \App\Mail\AcceptedMail($app));
-          break;
-        case "waitlisted":
-          Log::debug("Sent waitlist email for application" . $app->id . " and userID: " . $app->user->id);
-          Mail::to($app->user)->queue(new \App\Mail\WaitlistedMail($app));
-          break;
-        case "rejected":
-          Log::debug("Sent reject email for application" . $app->id . " and userID: " . $app->user->id);
-          Mail::to($app->user)->queue(new \App\Mail\RejectedMail($app));
-          break;
-        default:
-          Log::debug("Unknown status for app with id " . $app->id . " and status: " . $app->status);
-          break;
-      }
-    }
-    return $applicationsToSend;
-  }
 }

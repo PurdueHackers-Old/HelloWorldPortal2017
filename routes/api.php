@@ -18,7 +18,10 @@ Route::post('user/requestPasswordReset', 'AuthController@sendPasswordReset');
 Route::post('user/confirmPasswordReset', 'AuthController@performPasswordReset');
 
 Route::group(['middleware' => 'jwt.auth'], function() {
+	//Create & Edit Applications 
 	Route::post('user/apply', 'ApplicationController@createApplication');
+	Route::patch('user/apply', 'ApplicationController@updateApplication');
+
 	Route::get('applications', 'ApplicationController@getApplications');
 	Route::get('applications/{application_id}', 'ApplicationController@getSingleApplication');
 	Route::post('applications/{application_id}/setStatus', 'ApplicationController@setApplicationStatus');
