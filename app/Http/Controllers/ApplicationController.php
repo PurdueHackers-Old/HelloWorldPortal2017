@@ -14,6 +14,11 @@ class ApplicationController extends Controller
 {
 
 
+  //Get a user's own application
+  public function getSelfApplications(Request $request) {
+    return Application::findOrFail(Auth::user()->application);
+  }
+
   //Get a single application
   public function getSingleApplication($application_id) {
     //User must be an admin to view applications
@@ -63,7 +68,7 @@ class ApplicationController extends Controller
     $validator = Validator::make($request->all(), [
       'sampleQuestion' => 'max:127',
     ]);
-    
+
     if ($validator->fails()) {
         return response()->json(['message' => 'validation', 'errors' => $validator->errors()],400);
     }
