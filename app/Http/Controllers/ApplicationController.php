@@ -16,7 +16,11 @@ class ApplicationController extends Controller
 
   //Get a user's own application
   public function getSelfApplications(Request $request) {
-    return Application::findOrFail(Auth::user()->application);
+    $application = Auth::user()->application;
+    if($application == null || count($application) == 0) {
+      return response()->json(['message' => 'no_application'],404);
+    }
+    return response()->json(['message' => 'success', 'application' => $application]);
   }
 
   //Get a single application
