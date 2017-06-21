@@ -26,7 +26,14 @@ Route::group(['middleware' => 'jwt.auth'], function() {
 	Route::get('applications', 'ApplicationController@getApplications');
 	Route::get('applications/{application_id}', 'ApplicationController@getSingleApplication');
 	Route::post('applications/{application_id}/setStatus', 'ApplicationController@setApplicationStatus');
-	Route::post('sendApplicationEmails', 'ApplicationController@sendApplicationEmails');
+
+	//View Announcements and event information
+	Route::get('announcements', 'AnnouncementController@getAnnouncements');
+	Route::post('/announcements', 'AnnouncementController@sendAnnouncement');
+	Route::delete('/announcements', 'AnnouncementController@deleteAnnouncement');
+
+	//Exec Board features
+	Route::post('/exec/sendApplicationEmails', 'ExecController@sendApplicationEmails');
 });
 
 //TODO- Day-Of (announcements, tech talks, checkin, etc...)
