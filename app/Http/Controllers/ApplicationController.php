@@ -51,9 +51,9 @@ class ApplicationController extends Controller
       'referral' => 'required|in:social_media,website,flyers,class,friend',
       'hackathon_count' => 'required|integer',
       'shirt_size' => 'required|in:s,m,l,xl,xxl',
-      'github' => 'required|url',
-      'longanswer_1' => 'required',
-      'longanswer_2' => 'required',
+      'website' => 'required|url',
+      'longanswer_1' => 'required|max:2000',
+      'longanswer_2' => 'required|max:2000',
     ]);
 
     if ($validator->fails()) {
@@ -74,7 +74,7 @@ class ApplicationController extends Controller
     $application->hackathon_count = $request->hackathon_count;
     $application->shirt_size = $request->shirt_size;
     $application->dietary_restrictions = $request->dietary_restrictions;
-    $application->github = $request->github;
+    $application->website = $request->website;
     $application->longanswer_1 = $request->longanswer_1;
     $application->longanswer_2 = $request->longanswer_2;
 
@@ -96,7 +96,9 @@ class ApplicationController extends Controller
       'referral' => 'in:social_media,website,flyers,class,friend',
       'hackathon_count' => 'integer',
       'shirt_size' => 'in:s,m,l,xl,xxl',
-      'github' => 'url',
+      'website' => 'url',
+      'longanswer_1' => 'max:2000',
+      'longanswer_2' => 'max:2000',
     ]);
 
     if ($validator->fails()) {
@@ -112,7 +114,7 @@ class ApplicationController extends Controller
 
     //Update any attributes which were provided
     $data = $request->only(['class_year', 'grad_year', 'major',
-      'referral','hackathon_count','shirt_size','github',
+      'referral','hackathon_count','shirt_size','website',
       'dietary_restrictions','longanswer_1','longanswer_2']);
 
     foreach($data as $key => $value) {
