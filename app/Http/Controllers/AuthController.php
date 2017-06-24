@@ -57,6 +57,12 @@ class AuthController extends Controller
     if(count($baseRole) == 0) {
       return response()->json(['message' => 'internal_role_error'], 500);
     }
+
+    //Require people to register with a purdue email 
+    if(strpos($request->email,"@purdue.edu") === false) {
+      return response()->json(['message' => 'You must register using your purdue email address'], 400);
+    }
+
     $user = new User;
     $user->firstname = $request->firstname;
     $user->lastname = $request->lastname;

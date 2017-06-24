@@ -45,8 +45,17 @@ class ApplicationController extends Controller
   //Submits a new application
   public function createApplication(Request $request) {
     $validator = Validator::make($request->all(), [
-      'sampleQuestion' => 'required|max:127',
+      'class_year' => 'required|in:freshman,sophomore,junior,senior',
+      'grad_year' => 'required|in:2017,2018,2019,2020,2021,2022,2023,2024,2025',
+      'major' => 'required',
+      'referral' => 'required|in:social_media,website,flyers,class,friend',
+      'hackathon_count' => 'required|integer',
+      'shirt_size' => 'required|in:s,m,l,xl,xxl',
+      'github' => 'required|url',
+      'longanswer_1' => 'required',
+      'longanswer_2' => 'required',
     ]);
+
     if ($validator->fails()) {
         return response()->json(['message' => 'validation', 'errors' => $validator->errors()],400);
     }
@@ -55,8 +64,20 @@ class ApplicationController extends Controller
     if(count(Auth::user()->application) > 0) {
       return response()->json(['message' => 'application_already_exists'],400);
     }
+
     $application = new Application;
-    $application->sampleQuestion = $request->sampleQuestion;
+
+    $application->class_year = $request->class_year;
+    $application->grad_year = $request->grad_year;
+    $application->major = $request->major;
+    $application->referral = $request->referral;
+    $application->hackathon_count = $request->hackathon_count;
+    $application->shirt_size = $request->shirt_size;
+    $application->dietary_restrictions = $request->dietary_restrictions;
+    $application->github = $request->github;
+    $application->longanswer_1 = $request->longanswer_1;
+    $application->longanswer_2 = $request->longanswer_2;
+
     $application->user_id = Auth::id();
     $application->status = "pending";
     $application->last_email_status = "none";
@@ -70,7 +91,12 @@ class ApplicationController extends Controller
   public function updateApplication(Request $request) {
     //Validate input, but don't require any field in particular
     $validator = Validator::make($request->all(), [
-      'sampleQuestion' => 'max:127',
+      'class_year' => 'in:freshman,sophomore,junior,senior',
+      'grad_year' => 'in:2017,2018,2019,2020,2021,2022,2023,2024,2025',
+      'referral' => 'in:social_media,website,flyers,class,friend',
+      'hackathon_count' => 'integer',
+      'shirt_size' => 'in:s,m,l,xl,xxl',
+      'github' => 'url',
     ]);
 
     if ($validator->fails()) {
@@ -85,7 +111,10 @@ class ApplicationController extends Controller
     }
 
     //Update any attributes which were provided
-    $data = $request->only(['sampleQuestion']);
+    $data = $request->only(['class_year', 'grad_year', 'major',
+      'referral','hackathon_count','shirt_size','github',
+      'dietary_restrictions','longanswer_1','longanswer_2']);
+
     foreach($data as $key => $value) {
       if($value != null) {
         $application->$key = $value;

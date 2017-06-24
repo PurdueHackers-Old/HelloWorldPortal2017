@@ -20,7 +20,19 @@ class CreateApplicationsTable extends Migration
           $table->foreign('user_id')->references('id')->on('users')
             ->onDelete('cascade')->onUpdate('cascade');
 
-          $table->string('sampleQuestion');
+
+          //Create questions list
+          $table->string('class_year');
+          $table->string('grad_year');
+          $table->string('major');
+          $table->string('referral');
+          $table->integer('hackathon_count');
+          $table->string('shirt_size');
+          $table->string('dietary_restrictions')->nullable();
+          $table->string('github');
+          $table->text('longanswer_1');
+          $table->text('longanswer_2');
+
           $table->string('status');
           $table->timestamp('emailSent')->nullable();
           $table->string('last_email_status');
