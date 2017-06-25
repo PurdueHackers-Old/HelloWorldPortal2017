@@ -29,7 +29,7 @@ class CreateApplicationsTable extends Migration
           $table->integer('hackathon_count');
           $table->string('shirt_size');
           $table->string('dietary_restrictions')->nullable();
-          $table->string('website');
+          $table->string('website')->nullable();
           $table->text('longanswer_1');
           $table->text('longanswer_2');
 

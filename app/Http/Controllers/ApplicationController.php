@@ -48,10 +48,10 @@ class ApplicationController extends Controller
       'class_year' => 'required|in:freshman,sophomore,junior,senior',
       'grad_year' => 'required|in:2017,2018,2019,2020,2021,2022,2023,2024,2025',
       'major' => 'required',
-      'referral' => 'required|in:social_media,website,flyers,class,friend',
+      'referral' => 'required|in:social_media,website,flyers,class,friend,none',
       'hackathon_count' => 'required|integer',
       'shirt_size' => 'required|in:s,m,l,xl,xxl',
-      'website' => 'required|url',
+      'website' => 'url',
       'longanswer_1' => 'required|max:2000',
       'longanswer_2' => 'required|max:2000',
     ]);
@@ -93,7 +93,7 @@ class ApplicationController extends Controller
     $validator = Validator::make($request->all(), [
       'class_year' => 'in:freshman,sophomore,junior,senior',
       'grad_year' => 'in:2017,2018,2019,2020,2021,2022,2023,2024,2025',
-      'referral' => 'in:social_media,website,flyers,class,friend',
+      'referral' => 'in:social_media,website,flyers,class,friend,none',
       'hackathon_count' => 'integer',
       'shirt_size' => 'in:s,m,l,xl,xxl',
       'website' => 'url',
