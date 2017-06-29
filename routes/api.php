@@ -34,6 +34,7 @@ Route::group(['middleware' => 'jwt.auth'], function() {
 
 	//Exec Board features
 	Route::post('/exec/sendApplicationEmails', 'ExecController@sendApplicationEmails');
+	Route::post('/exec/checkin', 'ExecController@checkinUser');
 });
 
 //TODO- Day-Of (announcements, tech talks, checkin, etc...)

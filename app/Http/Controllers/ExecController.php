@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Validator;
 use App\Models\Announcement;
+use App\Models\Checkin;
+use App\Models\User;
 use Auth;
 
 class ExecController extends Controller
@@ -40,6 +42,36 @@ class ExecController extends Controller
       }
     }
     return $applicationsToSend;
+  }
+
+  public function checkinUser(Request $request) {
+    //User must be an admin to check someone in
+    if(!PermissionsController::hasRole('admin')) {
+      return response()->json(['message' => 'insufficient_permissions']);
+    }
+
+    $validator = Validator::make($request->all(), [
+      'email' => 'required|exists:users,email',
+    ]);
+    if ($validator->fails()) {
+        return response()->json(['message' => 'validation', 'errors' => $validator->errors()],400);
+    }
+
+    //TODO- Validate application status here if needed
+
+    //Checkin the user
+    $user = User::where('email',$request->email)->first();
+    $checkin = $user->checkin;
+    if(count($checkin) == 0) {
+      //User is just now checking in
+      $checkin = new Checkin;
+      $checkin->user_id = $user->id;
+      $checkin->save();
+      return response()->json(['message' => 'success']);
+    } else {
+      //User already checked in
+      return response()->json(['message' => 'already_checked_in']);
+    }
   }
 
 

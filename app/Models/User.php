@@ -49,6 +49,10 @@ class User extends Authenticatable
       return $this->hasOne('App\Models\Application');
     }
 
+    public function Checkin() {
+      return $this->hasOne('App\Models\Checkin');
+    }
+
     public function PasswordReset() {
       return $this->hasOne('App\Models\PasswordReset');
     }
