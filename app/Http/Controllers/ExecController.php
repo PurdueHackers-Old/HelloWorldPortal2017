@@ -74,5 +74,14 @@ class ExecController extends Controller
     }
   }
 
+  public function getCheckedInUsers(Request $request) {
+    //User must be an admin to check someone in
+    if(!PermissionsController::hasRole('admin')) {
+      return response()->json(['message' => 'insufficient_permissions']);
+    }
+    $checkins = Checkin::with('user')->get();
+    return $checkins;
+  }
+
 
 }

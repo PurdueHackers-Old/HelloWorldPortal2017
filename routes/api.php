@@ -34,6 +34,7 @@ Route::group(['middleware' => 'jwt.auth'], function() {
 
 	//Exec Board features
 	Route::post('/exec/sendApplicationEmails', 'ExecController@sendApplicationEmails');
+	Route::get('/exec/checkin', 'ExecController@getCheckedInUsers');
 	Route::post('/exec/checkin', 'ExecController@checkinUser');
 });
 
