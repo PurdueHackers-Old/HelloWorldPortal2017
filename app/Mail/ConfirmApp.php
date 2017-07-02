@@ -7,20 +7,20 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
-class WaitlistedMail extends Mailable
+class ConfirmApp extends Mailable
 {
-    public $application;
     use Queueable, SerializesModels;
+    public $user;
 
     /**
      * Create a new message instance.
      *
      * @return void
      */
-     public function __construct($application)
-     {
-       $this->application = $application;
-     }
+    public function __construct($user)
+    {
+        $this->user = $user;
+    }
 
     /**
      * Build the message.
@@ -30,7 +30,7 @@ class WaitlistedMail extends Mailable
     public function build()
     {
       return $this->from('noreply@purduehackers.com', 'Purdue Hackers')
-        ->subject('Hello World')
-        ->view('emails.waitlisted');
+        ->subject('Hello World Application')
+        ->view('emails.confirmapplication');
       }
 }

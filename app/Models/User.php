@@ -71,6 +71,13 @@ class User extends Authenticatable
         $targetUrl = getenv('FRONTEND_URL')."/confirmPassword?token=".$token;
         //Send Emails
         Mail::to($user)->queue(new \App\Mail\PasswordReset($token,$targetUrl));
-      }
+    }
+
+    public function sendConfirmApplicationEmail() {
+        $user = $this;
+        //Send Emails
+        Mail::to($user)->queue(new \App\Mail\ConfirmApp($user));
+    }
+
 
 }

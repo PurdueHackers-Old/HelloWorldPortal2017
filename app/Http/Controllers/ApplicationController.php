@@ -83,6 +83,9 @@ class ApplicationController extends Controller
     $application->last_email_status = "none";
     $application->save();
 
+    //Email user a confirmation
+    Auth::user()->sendConfirmApplicationEmail();
+
     return response()->json(['message' => 'success'],200);
 
   }
