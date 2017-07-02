@@ -33,7 +33,7 @@ Route::group(['middleware' => 'jwt.auth'], function() {
 	Route::delete('/announcements', 'AnnouncementController@deleteAnnouncement');
 
 	//Exec Board features
-	Route::post('/exec/sendApplicationEmails', 'ExecController@sendApplicationEmails');
+	Route::post('/exec/buildEmailList', 'ExecController@generateEmailsList');
 	Route::get('/exec/checkin', 'ExecController@getCheckedInUsers');
 	Route::post('/exec/checkin', 'ExecController@checkinUser');
 });

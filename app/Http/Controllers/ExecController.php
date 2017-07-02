@@ -8,40 +8,40 @@ use App\Models\Announcement;
 use App\Models\Checkin;
 use App\Models\User;
 use Auth;
+use App\Models\Application;
 
 class ExecController extends Controller
 {
 
-  public function sendApplicationEmails(Request $request) {
+  public function generateEmailsList(Request $request) {
     //User must be an admin to send mail
     if(!PermissionsController::hasRole('admin')) {
       return response()->json(['message' => 'insufficient_permissions']);
     }
 
-    //Grab all applications which have not been emailed out already AND that are not pending
-    $applicationsToSend = Application::where('last_email_status','none')->where('status','!=','pending')->with('user')->get();
-    foreach($applicationsToSend as $app) {
-      $app->last_email_status = $app->status;
-      $app->save();
-      switch($app->status) {
-        case "accepted":
-          Log::debug("Sent acceptance email for application" . $app->id . " and userID: " . $app->user->id);
-          Mail::to($app->user)->queue(new \App\Mail\AcceptedMail($app));
-          break;
-        case "waitlisted":
-          Log::debug("Sent waitlist email for application" . $app->id . " and userID: " . $app->user->id);
-          Mail::to($app->user)->queue(new \App\Mail\WaitlistedMail($app));
-          break;
-        case "rejected":
-          Log::debug("Sent reject email for application" . $app->id . " and userID: " . $app->user->id);
-          Mail::to($app->user)->queue(new \App\Mail\RejectedMail($app));
-          break;
-        default:
-          Log::debug("Unknown status for app with id " . $app->id . " and status: " . $app->status);
-          break;
-      }
+    //Get a list of all accepted applicants
+    $response = ['accepted' => [], 'rejected' => []];
+    $accepted =  Application::where('status','accepted')->with('user')->get();
+    //Build accepted list
+    foreach($accepted as $acc) {
+      $data = [
+        'firstname' => $acc->user->firstname,
+        'lastname' => $acc->user->lastname,
+        'email' => $acc->user->email
+      ];
+      array_push($response['accepted'],$data);
     }
-    return $applicationsToSend;
+    $rejected =  Application::where('status','rejected')->with('user')->get();
+    //Build rejected list
+    foreach($rejected as $acc) {
+      $data = [
+        'firstname' => $acc->user->firstname,
+        'lastname' => $acc->user->lastname,
+        'email' => $acc->user->email
+      ];
+      array_push($response['rejected'],$data);
+    }
+    return response()->json($response);
   }
 
   public function checkinUser(Request $request) {
