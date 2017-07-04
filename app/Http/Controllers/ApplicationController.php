@@ -12,11 +12,14 @@ use Mail;
 
 class ApplicationController extends Controller
 {
-
-
   //Get a user's own application
   public function getSelfApplications(Request $request) {
-    $application = Auth::user()->application;
+    //Do not select the internal status
+    $application = Auth::user()->application()
+      ->select('id','user_id','class_year','grad_year','major',
+      'referral','hackathon_count','shirt_size','dietary_restrictions',
+      'website','longanswer_1','longanswer_2','created_at','updated_at','status_public as status')
+      ->first();
     if($application == null || count($application) == 0) {
       return response()->json(['message' => 'no_application'],404);
     }
@@ -79,7 +82,8 @@ class ApplicationController extends Controller
     $application->longanswer_2 = $request->longanswer_2;
 
     $application->user_id = Auth::id();
-    $application->status = "pending";
+    $application->status_internal = "pending";
+    $application->status_public = "pending";
     $application->last_email_status = "none";
     $application->save();
 
@@ -150,20 +154,20 @@ class ApplicationController extends Controller
     $application = Application::findOrFail($application_id);
     switch($request->status) {
       case "accepted":
-        $application->status = "accepted";
+        $application->status_internal = "accepted";
         break;
       case "waitlisted":
-        $application->status = "waitlisted";
+        $application->status_internal = "waitlisted";
         break;
       case "rejected":
-        $application->status = "rejected";
+        $application->status_internal = "rejected";
         break;
       default:
         return response()->json(['message' => 'validation', 'errors' => 'invalid_status'],400);
         break;
     }
     $application->save();
-    return $application->with('user')->get();
+    return response()->json(['message' => 'success', 'application' => $application->with('user')->get()]);
   }
 
 

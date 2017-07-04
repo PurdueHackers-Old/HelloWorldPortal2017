@@ -33,7 +33,9 @@ class CreateApplicationsTable extends Migration
           $table->text('longanswer_1');
           $table->text('longanswer_2');
 
-          $table->string('status');
+          $table->string('status_internal');
+          $table->string('status_public');
+          $table->timestamp('published_timestamp')->nullable();
           $table->timestamp('emailSent')->nullable();
           $table->string('last_email_status');
           $table->timestamps();

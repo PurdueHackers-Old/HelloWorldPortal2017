@@ -33,9 +33,10 @@ Route::group(['middleware' => 'jwt.auth'], function() {
 	Route::delete('/announcements', 'AnnouncementController@deleteAnnouncement');
 
 	//Exec Board features
-	Route::post('/exec/buildEmailList', 'ExecController@generateEmailsList');
+	Route::get('/exec/buildEmailList', 'ExecController@generateEmailsList');
 	Route::get('/exec/checkin', 'ExecController@getCheckedInUsers');
 	Route::post('/exec/checkin', 'ExecController@checkinUser');
+	Route::post('/exec/publishStatus', 'ExecController@confirmApplicationStatus');
 });
 
 //TODO- Day-Of (announcements, tech talks, checkin, etc...)

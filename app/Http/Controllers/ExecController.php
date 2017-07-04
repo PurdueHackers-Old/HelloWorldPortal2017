@@ -9,9 +9,28 @@ use App\Models\Checkin;
 use App\Models\User;
 use Auth;
 use App\Models\Application;
+use Carbon\Carbon;
 
 class ExecController extends Controller
 {
+
+/**
+ * Marks all internal application status as public
+ */
+  public function confirmApplicationStatus(Request $request) {
+    //User must be an admin to send mail
+    if(!PermissionsController::hasRole('devteam')) {
+      return response()->json(['message' => 'insufficient_permissions']);
+    }
+
+    $applications = Application::with('user')->get();
+    foreach($applications as $app) {
+      $app->status_public = $app->status_internal;
+      $app->published_timestamp = Carbon::now();
+      $app->save();
+    }
+    return response()->json(['message' => 'success']);
+  }
 
   public function generateEmailsList(Request $request) {
     //User must be an admin to send mail
@@ -21,7 +40,7 @@ class ExecController extends Controller
 
     //Get a list of all accepted applicants
     $response = ['accepted' => [], 'rejected' => []];
-    $accepted =  Application::where('status','accepted')->with('user')->get();
+    $accepted =  Application::where('status_public','accepted')->with('user')->get();
     //Build accepted list
     foreach($accepted as $acc) {
       $data = [
@@ -31,7 +50,7 @@ class ExecController extends Controller
       ];
       array_push($response['accepted'],$data);
     }
-    $rejected =  Application::where('status','rejected')->with('user')->get();
+    $rejected =  Application::where('status_public','rejected')->with('user')->get();
     //Build rejected list
     foreach($rejected as $acc) {
       $data = [
