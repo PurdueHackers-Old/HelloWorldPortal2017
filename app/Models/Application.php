@@ -12,7 +12,9 @@ class Application extends Model
       return $this->belongsTo('App\Models\User');
     }
 
-    public function getResumePath() {
-      return 'resumes/resume_'.$this->uuid.'.pdf';
+    public function Resume() {
+      return $this->hasOne('App\Models\Resume');
     }
+
+
 }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Validator;
 use App\Models\Application;
+use App\Models\Resume;
 use Auth;
 use Illuminate\Validation\Rule;
 use Log;
@@ -53,22 +54,18 @@ class ApplicationController extends Controller
  * Uploads the given file to S3.
  * returns true on success, false on failure
  */
-  public function uploadFile($fileHandle,$application) {
-    $path = $application->getResumePath();
+  public function uploadResume($fileHandle,$application) {
+    $resume = $application->resume;
+    if(!$resume) {
+      //Need to create the resume model
+      $resume = new Resume;
+      $resume->user_id = $application->user_id;
+      $resume->application_id = $application->id;
+      $resume->uuid = Uuid::generate();
+      $resume->save();
+    }
+    $path = $resume->getResumePath();
     Storage::disk('s3')->put($path, file_get_contents($fileHandle));
-    return true;
-  }
-
-  public function getPreSignedUrl($application) {
-    $client = Storage::disk('s3')->getDriver()->getAdapter()->getClient();
-    $expiry = "+10 minutes";
-    $path = $application->getResumePath();
-    $command = $client->getCommand('GetObject', [
-        'Bucket' => env('AWS_BUCKET'),
-        'Key'    => $path
-    ]);
-    $request = $client->createPresignedRequest($command, $expiry);
-    return (string) $request->getUri();
   }
 
   //Submits a new application
@@ -112,17 +109,13 @@ class ApplicationController extends Controller
     $application->status_internal = "pending";
     $application->status_public = "pending";
     $application->last_email_status = "none";
+    $application->save();
 
     //Upload resume if provided
     if($request->resume) {
       $fileHandle = $request->file('resume');
-      if(!$this->uploadFile($fileHandle,$application)) {
-        //Something went wrong
-        return response()->json(['message' => 'error'],500);
-      }
+      $this->uploadResume($fileHandle,$application);
     }
-
-    $application->save();
 
     //Email user a confirmation
     Auth::user()->sendConfirmApplicationEmail();
@@ -168,10 +161,7 @@ class ApplicationController extends Controller
           //Upload resume if provided
           if($request->resume) {
             $fileHandle = $request->file('resume');
-            if(!$this->uploadFile($fileHandle,$application)) {
-              //Something went wrong
-              return response()->json(['message' => 'error'],500);
-            }
+            $this->uploadResume($fileHandle,$application);
           }
         } else {
           $application->$key = $value;
