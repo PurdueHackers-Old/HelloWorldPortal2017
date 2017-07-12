@@ -9,6 +9,10 @@ use Auth;
 use Illuminate\Validation\Rule;
 use Log;
 use Mail;
+use Storage;
+use Response;
+use App\Models\User;
+use Webpatser\Uuid\Uuid;
 
 class ApplicationController extends Controller
 {
@@ -45,6 +49,28 @@ class ApplicationController extends Controller
     return Application::with('user')->get();
   }
 
+/**
+ * Uploads the given file to S3.
+ * returns true on success, false on failure
+ */
+  public function uploadFile($fileHandle,$application) {
+    $path = $application->getResumePath();
+    Storage::disk('s3')->put($path, file_get_contents($fileHandle));
+    return true;
+  }
+
+  public function getPreSignedUrl($application) {
+    $client = Storage::disk('s3')->getDriver()->getAdapter()->getClient();
+    $expiry = "+10 minutes";
+    $path = $application->getResumePath();
+    $command = $client->getCommand('GetObject', [
+        'Bucket' => env('AWS_BUCKET'),
+        'Key'    => $path
+    ]);
+    $request = $client->createPresignedRequest($command, $expiry);
+    return (string) $request->getUri();
+  }
+
   //Submits a new application
   public function createApplication(Request $request) {
     $validator = Validator::make($request->all(), [
@@ -57,6 +83,7 @@ class ApplicationController extends Controller
       'website' => 'url',
       'longanswer_1' => 'required|max:2000',
       'longanswer_2' => 'required|max:2000',
+      'resume' => 'file',
     ]);
 
     if ($validator->fails()) {
@@ -69,7 +96,7 @@ class ApplicationController extends Controller
     }
 
     $application = new Application;
-
+    $application->uuid = Uuid::generate();
     $application->class_year = $request->class_year;
     $application->grad_year = $request->grad_year;
     $application->major = $request->major;
@@ -85,6 +112,16 @@ class ApplicationController extends Controller
     $application->status_internal = "pending";
     $application->status_public = "pending";
     $application->last_email_status = "none";
+
+    //Upload resume if provided
+    if($request->resume) {
+      $fileHandle = $request->file('resume');
+      if(!$this->uploadFile($fileHandle,$application)) {
+        //Something went wrong
+        return response()->json(['message' => 'error'],500);
+      }
+    }
+
     $application->save();
 
     //Email user a confirmation
@@ -106,6 +143,7 @@ class ApplicationController extends Controller
       'website' => 'url',
       'longanswer_1' => 'max:2000',
       'longanswer_2' => 'max:2000',
+      'resume' => 'file'
     ]);
 
     if ($validator->fails()) {
@@ -122,11 +160,22 @@ class ApplicationController extends Controller
     //Update any attributes which were provided
     $data = $request->only(['class_year', 'grad_year', 'major',
       'referral','hackathon_count','shirt_size','website',
-      'dietary_restrictions','longanswer_1','longanswer_2']);
+      'dietary_restrictions','longanswer_1','longanswer_2','resume']);
 
     foreach($data as $key => $value) {
       if($value != null) {
-        $application->$key = $value;
+        if($key == 'resume') {
+          //Upload resume if provided
+          if($request->resume) {
+            $fileHandle = $request->file('resume');
+            if(!$this->uploadFile($fileHandle,$application)) {
+              //Something went wrong
+              return response()->json(['message' => 'error'],500);
+            }
+          }
+        } else {
+          $application->$key = $value;
+        }
       }
     }
 

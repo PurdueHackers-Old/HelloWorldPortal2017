@@ -11,4 +11,8 @@ class Application extends Model
     public function User() {
       return $this->belongsTo('App\Models\User');
     }
+
+    public function getResumePath() {
+      return 'resumes/resume_'.$this->uuid.'.pdf';
+    }
 }

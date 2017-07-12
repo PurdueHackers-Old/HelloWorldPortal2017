@@ -20,6 +20,7 @@ class CreateApplicationsTable extends Migration
           $table->foreign('user_id')->references('id')->on('users')
             ->onDelete('cascade')->onUpdate('cascade');
 
+          $table->uuid('uuid');
 
           //Create questions list
           $table->string('class_year');
