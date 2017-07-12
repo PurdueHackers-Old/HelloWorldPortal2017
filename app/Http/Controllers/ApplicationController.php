@@ -14,6 +14,7 @@ use Storage;
 use Response;
 use App\Models\User;
 use Webpatser\Uuid\Uuid;
+use Input;
 
 class ApplicationController extends Controller
 {
@@ -75,6 +76,16 @@ class ApplicationController extends Controller
     Storage::disk('s3')->put($path, file_get_contents($fileHandle));
   }
 
+  public function validateFile($fileHandle) {
+    if($fileHandle == null) {
+      return false;
+    }
+    if($fileHandle->getMimeType() != "application/pdf") {
+      return false;
+    }
+    return true;
+  }
+
   //Submits a new application
   public function createApplication(Request $request) {
     $validator = Validator::make($request->all(), [
@@ -98,6 +109,15 @@ class ApplicationController extends Controller
     if(count(Auth::user()->application) > 0) {
       return response()->json(['message' => 'application_already_exists'],400);
     }
+
+    //Validate filetype
+    if($request->resume
+      && !$this->validateFile($request->file('resume'))) {
+        return response()->json(['message' => 'validation', 'errors' => [
+          'resume' => ['invalid filetype']
+          ]],400);
+    }
+
 
     $application = new Application;
     $application->uuid = Uuid::generate();
@@ -156,6 +176,15 @@ class ApplicationController extends Controller
     if($application == null || count($application) == 0) {
       return response()->json(['message' => 'application_does_not_exist'],400);
     }
+
+    //Validate filetype
+    if($request->resume
+      && !$this->validateFile($request->file('resume'))) {
+        return response()->json(['message' => 'validation', 'errors' => [
+          'resume' => ['invalid filetype']
+          ]],400);
+      }
+
 
     //Update any attributes which were provided
     $data = $request->only(['class_year', 'grad_year', 'major',
