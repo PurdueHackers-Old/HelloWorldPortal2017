@@ -24,7 +24,7 @@ class ApplicationController extends Controller
       ->select('id','user_id','class_year','grad_year','major',
       'referral','hackathon_count','shirt_size','dietary_restrictions',
       'website','longanswer_1','longanswer_2','created_at','updated_at','status_public as status')
-      ->first();
+      ->with('resume')->first();
     if($application == null || count($application) == 0) {
       return response()->json(['message' => 'no_application'],404);
     }
@@ -37,7 +37,14 @@ class ApplicationController extends Controller
     if(!PermissionsController::hasRole('admin')) {
       return response()->json(['message' => 'insufficient_permissions']);
     }
-    return Application::findOrFail($application_id)->with('user')->get();
+
+    $application = Application::findOrFail($application_id)->with('user')->with('resume')->first();
+    //Generate a url to the resume
+    if(count($application->resume) > 0) {
+      //There is a resume uploaded
+      $application->resume->url = $application->resume->getPreSignedUrl();
+    }
+    return $application;
   }
 
   //Gets a list of all applications
@@ -170,7 +177,7 @@ class ApplicationController extends Controller
     }
 
     $application->save();
-    return response()->json(['message' => 'success','application' => $application],200);
+    return response()->json(['message' => 'success','application' => $application->with('resume')->get()],200);
 
   }
 
