@@ -49,6 +49,10 @@ class User extends Authenticatable
       return $this->hasOne('App\Models\Application');
     }
 
+    public function RSVP() {
+      return $this->hasOne('App\Models\RSVP');
+    }
+
     public function Resume() {
       return $this->hasOne('App\Models\Resume');
     }

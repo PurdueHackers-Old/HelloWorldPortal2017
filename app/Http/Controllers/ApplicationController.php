@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Validator;
 use App\Models\Application;
+use App\Models\RSVP;
 use App\Models\Resume;
 use Auth;
 use Illuminate\Validation\Rule;
@@ -144,11 +145,50 @@ class ApplicationController extends Controller
       $this->uploadResume($fileHandle,$application);
     }
 
+    //Create an empty RSVP
+    $rsvp = new RSVP;
+    $rsvp->user_id = Auth::id();
+    $rsvp->application_id = $application->id;
+    $rsvp->status = "pending";
+    $rsvp->save();
+
     //Email user a confirmation
     Auth::user()->sendConfirmApplicationEmail();
 
     return response()->json(['message' => 'success'],200);
 
+  }
+
+  public function sendRSVP(Request $request) {
+    $validator = Validator::make($request->all(), [
+      'status' => 'required|in:attending,declined',
+    ]);
+    if ($validator->fails()) {
+        return response()->json(['message' => 'validation', 'errors' => $validator->errors()],400);
+    }
+
+    //Make sure the user has been accepted
+    $user = Auth::user();
+    if($user->application->status_public != "accepted") {
+      return response()->json(['message' => 'error',
+        'details' => "User may not RSVP before being accepted"],403);
+    }
+
+    //Update the rsvp status
+    $rsvp = $user->rsvp;
+    switch($request->status) {
+      case "attending":
+        $rsvp->status = "attending";
+        break;
+      case "declined":
+        $rsvp->status = "declined";
+        break;
+      default:
+      return response()->json(['message' => 'error',
+        'details' => "Invalid status"],400);
+    }
+    $rsvp->save();
+    return response()->json(['message' => 'success', 'rsvp' => $rsvp],200);
   }
 
   //Updates an existing application
