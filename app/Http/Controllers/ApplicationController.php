@@ -26,7 +26,7 @@ class ApplicationController extends Controller
       ->select('id','user_id','class_year','grad_year','major',
       'referral','hackathon_count','shirt_size','dietary_restrictions',
       'website','longanswer_1','longanswer_2','created_at','updated_at','status_public as status')
-      ->with('resume')->first();
+      ->with('resume')->with('rsvp')->first();
     if($application == null || count($application) == 0) {
       return response()->json(['message' => 'no_application'],404);
     }
@@ -40,7 +40,7 @@ class ApplicationController extends Controller
       return response()->json(['message' => 'insufficient_permissions']);
     }
 
-    $application = Application::findOrFail($application_id)->with('user')->with('resume')->first();
+    $application = Application::findOrFail($application_id)->with('user')->with('resume')->with('rsvp')->first();
     //Generate a url to the resume
     if(count($application->resume) > 0) {
       //There is a resume uploaded
@@ -56,7 +56,7 @@ class ApplicationController extends Controller
       return response()->json(['message' => 'insufficient_permissions']);
     }
 
-    return Application::with('user')->get();
+    return Application::with('user')->with('rsvp')->get();
   }
 
 /**
