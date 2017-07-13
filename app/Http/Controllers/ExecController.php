@@ -10,6 +10,8 @@ use App\Models\User;
 use Auth;
 use App\Models\Application;
 use Carbon\Carbon;
+use Log;
+use Storage;
 
 class ExecController extends Controller
 {
@@ -17,50 +19,77 @@ class ExecController extends Controller
 /**
  * Marks all internal application status as public
  */
-  public function confirmApplicationStatus(Request $request) {
+  public function publishApplicationStatus(Request $request) {
+
     //User must be an admin to send mail
     if(!PermissionsController::hasRole('devteam')) {
       return response()->json(['message' => 'insufficient_permissions']);
     }
 
+
+    $response = ['accepted' => [], 'waitlisted' => [], 'rejected' => []];
+    $warningApplications = [];
+    //Get a list of all applications where the status is about to change
+    $updatedApplications =  Application::whereRaw("status_public != status_internal")
+      ->where('status_internal','!=','pending')->with('user')->get();
+    foreach($updatedApplications as $application) {
+      $data = [
+        'firstname' =>   $application->user->firstname,
+        'lastname'  =>   $application->user->lastname,
+        'email'     =>   $application->user->email,
+        'status_old' =>  $application->status_public,
+        'status_new' =>  $application->status_internal
+      ];
+      switch($application->status_internal) {
+        case "accepted":
+          array_push($response['accepted'],$data);
+          break;
+
+        case "waitlisted":
+          array_push($response['waitlisted'],$data);
+          break;
+
+        case "rejected":
+          array_push($response['rejected'],$data);
+          break;
+      }
+
+      //Check for any users who were un-accepted
+      if(($application->status_internal == "waitlisted"
+      || $application->status_internal == "rejected") && $application->status_public == "accepted") {
+        array_push($warningApplications,$application);
+      }
+    }
+
+    //If any users had their status go backwards, cancel the operation and issue a warning
+    if(count($warningApplications) > 0) {
+      Log::warning("DID NOT publish application status due to warnings! Affected applications: " . json_encode($warningApplications));
+      $filename = "/mail_logs/log_".Carbon::now()->timezone("EST")->format("Y-m-d__H_i_s").".log";
+      $fileContent = "DID NOT publish application status due to warnings!";
+      $fileContent .= "\nTime: ".Carbon::now()->timezone("EST")->format("Y-m-d H:i:s");
+      $fileContent .= "\n\nAffected Applications:\n".json_encode($warningApplications);
+      Storage::put($filename,$fileContent);
+      return response()->json(['message' => 'warning', 'applications' =>
+        $warningApplications, 'details' => "These users are about to have their status changed from accepted to waitlisted or rejected. This should not happen!"]);
+    }
+
+    //Publish the statuses
     $applications = Application::with('user')->get();
     foreach($applications as $app) {
       $app->status_public = $app->status_internal;
       $app->published_timestamp = Carbon::now();
       $app->save();
     }
-    return response()->json(['message' => 'success']);
-  }
 
-  public function generateEmailsList(Request $request) {
-    //User must be an admin to send mail
-    if(!PermissionsController::hasRole('admin')) {
-      return response()->json(['message' => 'insufficient_permissions']);
-    }
+    //Log a record of this update
+    Log::warning("PUBLISHING application status! Affected users: " . json_encode($response));
+    $filename = "/mail_logs/log_".Carbon::now()->timezone("EST")->format("Y-m-d__H_i_s").".log";
+    $fileContent = "PUBLISHING application status!";
+    $fileContent .= "\nTime: ".Carbon::now()->timezone("EST")->format("Y-m-d H:i:s");
+    $fileContent .= "\n\nAffected Users:\n".json_encode($response);
+    Storage::put($filename,$fileContent);
 
-    //Get a list of all accepted applicants
-    $response = ['accepted' => [], 'rejected' => []];
-    $accepted =  Application::where('status_public','accepted')->with('user')->get();
-    //Build accepted list
-    foreach($accepted as $acc) {
-      $data = [
-        'firstname' => $acc->user->firstname,
-        'lastname' => $acc->user->lastname,
-        'email' => $acc->user->email
-      ];
-      array_push($response['accepted'],$data);
-    }
-    $rejected =  Application::where('status_public','rejected')->with('user')->get();
-    //Build rejected list
-    foreach($rejected as $acc) {
-      $data = [
-        'firstname' => $acc->user->firstname,
-        'lastname' => $acc->user->lastname,
-        'email' => $acc->user->email
-      ];
-      array_push($response['rejected'],$data);
-    }
-    return response()->json($response);
+    return response()->json(['message' => 'success','data' => $response]);
   }
 
   public function checkinUser(Request $request) {
