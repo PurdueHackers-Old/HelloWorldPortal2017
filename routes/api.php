@@ -30,7 +30,8 @@ Route::group(['middleware' => 'jwt.auth'], function() {
 	//View Announcements and event information
 	Route::get('announcements', 'AnnouncementController@getAnnouncements');
 	Route::post('/announcements', 'AnnouncementController@sendAnnouncement');
-	Route::delete('/announcements', 'AnnouncementController@deleteAnnouncement');
+	Route::delete('/announcements/{announcement_id}', 'AnnouncementController@deleteAnnouncement');
+	Route::get('announcements/{announcement_id}', 'AnnouncementController@getAnnouncement');
 
 	//Exec Board features
 	Route::get('/exec/checkin', 'ExecController@getCheckedInUsers');

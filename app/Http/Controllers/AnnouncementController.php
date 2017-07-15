@@ -12,8 +12,19 @@ class AnnouncementController extends Controller
   //Get a list of announcements
   public function getAnnouncements() {
     //Decide which filter to use
-    //TODO- Add filter for attending/not attending / mentor/student
     $announcements = Announcement::get();
+    return response()->json(['message' => 'success',
+    'announcements' => $announcements]);
+  }
+
+  //Get a specific announcements
+  public function getAnnouncement($announcement_id) {
+    //Decide which filter to use
+    $announcements = Announcement::where('id',$announcement_id)->get();
+    if(count($announcements) <= 0) {
+      return response()->json(['message' => 'error',
+      'details' => 'Invalid announcement id'],404);
+    }
     return response()->json(['message' => 'success',
     'announcements' => $announcements]);
   }
@@ -26,7 +37,6 @@ class AnnouncementController extends Controller
     }
     $validator = Validator::make($request->all(), [
       'message' => 'required',
-      'scope' => 'required|in:all,attending,mentors',
     ]);
     if ($validator->fails()) {
       return ['message' => 'validation', 'errors' => $validator->errors()];
@@ -34,25 +44,17 @@ class AnnouncementController extends Controller
     $announcement = new Announcement;
     $announcement->user_id = Auth::id();
     $announcement->message = $request->message;
-    $announcement->scope = $request->scope;
     $announcement->save();
     return response()->json(['message' => 'success']);
   }
 
-  public function deleteAnnouncement(Request $request) {
+  public function deleteAnnouncement($announcement_id) {
     //User must be an admin
     if(!PermissionsController::hasRole('admin')) {
       return response()->json(['message' => 'insufficient_permissions']);
     }
-    $validator = Validator::make($request->all(), [
-      'message' => 'required',
-      'id' => 'required|exists:announcements,id',
-    ]);
-    if ($validator->fails()) {
-      return ['message' => 'validation', 'errors' => $validator->errors()];
-    }
-
-    Announcement::destroy($request->id);
+    $announcement = Announcement::findOrFail($announcement_id);
+    $announcement->delete();
     return response()->json(['message' => 'success']);
   }
 
