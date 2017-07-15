@@ -12,11 +12,19 @@ use Illuminate\Http\Request;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
+
+
+//Unauthenticated Routes
+Route::get('announcements', 'AnnouncementController@getAnnouncements');
+Route::get('announcements/{announcement_id}', 'AnnouncementController@getAnnouncement');
+
 Route::post('user/register', 'AuthController@register');
 Route::post('user/auth', 'AuthController@login');
 Route::post('user/requestPasswordReset', 'AuthController@sendPasswordReset');
 Route::post('user/confirmPasswordReset', 'AuthController@performPasswordReset');
 
+
+//Authenticated Routes
 Route::group(['middleware' => 'jwt.auth'], function() {
 	//Create & Edit Applications
 	Route::get('user/application', 'ApplicationController@getSelfApplications');
@@ -28,10 +36,8 @@ Route::group(['middleware' => 'jwt.auth'], function() {
 	Route::post('applications/{application_id}/setStatus', 'ApplicationController@setApplicationStatus');
 
 	//View Announcements and event information
-	Route::get('announcements', 'AnnouncementController@getAnnouncements');
 	Route::post('/announcements', 'AnnouncementController@sendAnnouncement');
 	Route::delete('/announcements/{announcement_id}', 'AnnouncementController@deleteAnnouncement');
-	Route::get('announcements/{announcement_id}', 'AnnouncementController@getAnnouncement');
 
 	//Exec Board features
 	Route::get('/exec/checkin', 'ExecController@getCheckedInUsers');
