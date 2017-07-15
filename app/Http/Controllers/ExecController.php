@@ -131,5 +131,26 @@ class ExecController extends Controller
     return $checkins;
   }
 
+  public function getStatistics() {
+    //User must be an admin to check someone in
+    if(!PermissionsController::hasRole('admin')) {
+      return response()->json(['message' => 'insufficient_permissions']);
+    }
+
+    return response()->json([
+      'message' => 'success',
+      'checkins' => Checkin::count(),
+      'applications' => Application::count(),
+      'pending_internal' => Application::where('status_internal','pending')->count(),
+      'accepted_internal' => Application::where('status_internal','accepted')->count(),
+      'rejected_internal' => Application::where('status_internal','rejected')->count(),
+      'waitlisted_internal' => Application::where('status_internal','waitlisted')->count(),
+      'pending_public' => Application::where('status_public','pending')->count(),
+      'accepted_public' => Application::where('status_public','accepted')->count(),
+      'rejected_public' => Application::where('status_public','rejected')->count(),
+      'waitlisted_public' => Application::where('status_public','waitlisted')->count(),
+    ]);
+  }
+
 
 }

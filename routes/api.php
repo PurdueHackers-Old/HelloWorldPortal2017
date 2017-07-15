@@ -43,6 +43,7 @@ Route::group(['middleware' => 'jwt.auth'], function() {
 	Route::get('/exec/checkin', 'ExecController@getCheckedInUsers');
 	Route::post('/exec/checkin', 'ExecController@checkinUser');
 	Route::post('/exec/publishStatus', 'ExecController@publishApplicationStatus');
+	Route::get('/exec/statistics', 'ExecController@getStatistics');
 });
 
 //TODO- Day-Of (announcements, tech talks, checkin, etc...)
