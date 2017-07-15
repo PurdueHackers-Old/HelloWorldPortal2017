@@ -22,12 +22,10 @@ Route::group(['middleware' => 'jwt.auth'], function() {
 	Route::get('user/application', 'ApplicationController@getSelfApplications');
 	Route::post('user/apply', 'ApplicationController@createApplication');
 	Route::post('user/updateApplication', 'ApplicationController@updateApplication');
-	Route::post('user/rsvp', 'ApplicationController@sendRSVP');
 
 	Route::get('applications', 'ApplicationController@getApplications');
 	Route::get('applications/{application_id}', 'ApplicationController@getSingleApplication');
 	Route::post('applications/{application_id}/setStatus', 'ApplicationController@setApplicationStatus');
-
 
 	//View Announcements and event information
 	Route::get('announcements', 'AnnouncementController@getAnnouncements');

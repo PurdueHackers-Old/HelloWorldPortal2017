@@ -16,8 +16,5 @@ class Application extends Model
       return $this->hasOne('App\Models\Resume');
     }
 
-    public function RSVP() {
-      return $this->hasOne('App\Models\RSVP');
-    }
 
 }
