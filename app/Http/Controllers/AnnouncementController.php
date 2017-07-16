@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Validator;
 use App\Models\Announcement;
+use App\Models\User;
 use Auth;
+use Mail;
 
 class AnnouncementController extends Controller
 {
@@ -37,6 +39,7 @@ class AnnouncementController extends Controller
     }
     $validator = Validator::make($request->all(), [
       'message' => 'required',
+      'should_email' => 'required|boolean',
     ]);
     if ($validator->fails()) {
       return ['message' => 'validation', 'errors' => $validator->errors()];
@@ -45,6 +48,18 @@ class AnnouncementController extends Controller
     $announcement->user_id = Auth::id();
     $announcement->message = $request->message;
     $announcement->save();
+
+    if($request->should_email) {
+      //Queue a mass email to anybody who's checked in
+      $totalUsers = User::with('checkin')->get();
+      $targetUsers = [];
+      foreach($totalUsers as $u) {
+        if(count($u->checkin) > 0) {
+          array_push($targetUsers,$u);
+        }
+      }
+      Mail::bcc($targetUsers)->queue(new \App\Mail\AnnouncementMail($announcement->message));
+    }
     return response()->json(['message' => 'success']);
   }
 
