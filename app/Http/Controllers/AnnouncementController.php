@@ -39,7 +39,7 @@ class AnnouncementController extends Controller
     }
     $validator = Validator::make($request->all(), [
       'message' => 'required',
-      'should_email' => 'required|boolean',
+      'should_email' => 'required|in:true,false',
     ]);
     if ($validator->fails()) {
       return ['message' => 'validation', 'errors' => $validator->errors()];
@@ -49,7 +49,7 @@ class AnnouncementController extends Controller
     $announcement->message = $request->message;
     $announcement->save();
 
-    if($request->should_email) {
+    if($request->should_email == "true") {
       //Queue a mass email to anybody who's checked in
       $totalUsers = User::with('checkin')->get();
       $targetUsers = [];
