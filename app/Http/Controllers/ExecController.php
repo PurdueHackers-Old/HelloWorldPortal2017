@@ -152,5 +152,11 @@ class ExecController extends Controller
     ]);
   }
 
+  /**
+   * Returns the id for an app which still needs to be reviewed by an admin
+   */
+  public function getNextApp() {
+    return Application::where('status_internal','pending')->inRandomOrder()->first();
+  }
 
 }
