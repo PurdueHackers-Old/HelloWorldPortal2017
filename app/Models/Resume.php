@@ -24,6 +24,10 @@ class Resume extends Model
  * for a short period
  */
   public function getPreSignedUrl() {
+    if(getenv('FILESYSTEM_DRIVER','local') == 'local') {
+      //App is running locally, can't provide real url
+      return "http://localhost";
+    }
     $client = Storage::disk('s3')->getDriver()->getAdapter()->getClient();
     $expiry = "+10 minutes";
     $path = $this->getResumePath();

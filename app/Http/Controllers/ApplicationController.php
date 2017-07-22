@@ -73,7 +73,7 @@ class ApplicationController extends Controller
       $resume->save();
     }
     $path = $resume->getResumePath();
-    Storage::disk('s3')->put($path, file_get_contents($fileHandle));
+    Storage::put($path, file_get_contents($fileHandle));
   }
 
   public function validateFile($fileHandle) {
