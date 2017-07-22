@@ -35,9 +35,9 @@ class ApplicationController extends Controller
   //Get a single application
   public function getSingleApplication($application_id) {
     //User must be an admin to view applications
-    // if(!PermissionsController::hasRole('admin')) {
-      // return response()->json(['message' => 'insufficient_permissions'],403);
-    // }
+    if(!PermissionsController::hasRole('admin')) {
+      return response()->json(['message' => 'insufficient_permissions'],403);
+    }
 
     $application = Application::findOrFail($application_id)->with('user')->with('resume')->first();
     //Generate a url to the resume
