@@ -1,0 +1,15 @@
+language: php
+
+php:
+  - 5.6
+
+before_script:
+  - cp .env.travis .env
+  - mysql -e 'create database hellodb;'
+  - composer self-update
+  - composer install --no-interaction
+  - php artisan migrate --seed
+script:
+  - vendor/bin/phpunit --verbose --coverage-text --coverage-clover=coverage.xml
+after_success:
+  - bash <(curl -s https://codecov.io/bash) -t 61d3d36b-6f82-4bd2-bc58-2fc89972b9d0
