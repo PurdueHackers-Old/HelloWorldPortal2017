@@ -36,7 +36,7 @@ class ApplicationController extends Controller
   public function getSingleApplication($application_id) {
     //User must be an admin to view applications
     if(!PermissionsController::hasRole('admin')) {
-      return response()->json(['message' => 'insufficient_permissions']);
+      return response()->json(['message' => 'insufficient_permissions'],403);
     }
 
     $application = Application::findOrFail($application_id)->with('user')->with('resume')->first();
@@ -52,7 +52,7 @@ class ApplicationController extends Controller
   public function getApplications() {
     //User must be an admin to view applications
     if(!PermissionsController::hasRole('admin')) {
-      return response()->json(['message' => 'insufficient_permissions']);
+      return response()->json(['message' => 'insufficient_permissions'],403);
     }
 
     return Application::with('user')->get();
@@ -213,7 +213,7 @@ class ApplicationController extends Controller
   public function setApplicationStatus(Request $request, $application_id) {
     //User must be an admin to view applications
     if(!PermissionsController::hasRole('admin')) {
-      return response()->json(['message' => 'insufficient_permissions']);
+      return response()->json(['message' => 'insufficient_permissions'],403);
     }
 
     $validator = Validator::make($request->all(), [

@@ -35,14 +35,14 @@ class AnnouncementController extends Controller
   public function sendAnnouncement(Request $request) {
     //User must be an admin
     if(!PermissionsController::hasRole('admin')) {
-      return response()->json(['message' => 'insufficient_permissions']);
+      return response()->json(['message' => 'insufficient_permissions'],403);
     }
     $validator = Validator::make($request->all(), [
       'message' => 'required',
       'should_email' => 'required|in:true,false',
     ]);
     if ($validator->fails()) {
-      return ['message' => 'validation', 'errors' => $validator->errors()];
+      return response()->json(['message' => 'validation', 'errors' => $validator->errors()],400);
     }
     $announcement = new Announcement;
     $announcement->user_id = Auth::id();
@@ -66,7 +66,7 @@ class AnnouncementController extends Controller
   public function deleteAnnouncement($announcement_id) {
     //User must be an admin
     if(!PermissionsController::hasRole('admin')) {
-      return response()->json(['message' => 'insufficient_permissions']);
+      return response()->json(['message' => 'insufficient_permissions'],403);
     }
     $announcement = Announcement::findOrFail($announcement_id);
     $announcement->delete();

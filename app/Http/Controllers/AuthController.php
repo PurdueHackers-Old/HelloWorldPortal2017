@@ -58,9 +58,11 @@ class AuthController extends Controller
       return response()->json(['message' => 'internal_role_error'], 500);
     }
 
-    //Require people to register with a purdue email 
+    //Require people to register with a purdue email
     if(strpos($request->email,"@purdue.edu") === false) {
-      return response()->json(['message' => 'You must register using your purdue email address'], 400);
+      $validator->getMessageBag()->add('email', 'Email must be a purdue email address');
+      return ['message' => 'validation', 'errors' => $validator->errors()];
+      // return response()->json(['message' => 'You must register using your purdue email address'], 400);
     }
 
     $user = new User;
