@@ -18,6 +18,7 @@ class CreateResumeTable extends Migration
         $table->timestamps();
 
         $table->uuid('uuid');
+        $table->string('filename_original');
 
         $table->integer('application_id')->unsigned();
         $table->foreign('application_id')->references('id')->on('applications')

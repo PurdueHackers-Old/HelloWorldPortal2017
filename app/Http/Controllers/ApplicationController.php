@@ -29,6 +29,12 @@ class ApplicationController extends Controller
     if($application == null || count($application) == 0) {
       return response()->json(['message' => 'no_application'],404);
     }
+
+    //Generate a url to the resume if present
+    if(count($application->resume) > 0) {
+      //There is a resume uploaded
+      $application->resume->url = $application->resume->getPreSignedUrl();
+    }
     return response()->json(['message' => 'success', 'application' => $application]);
   }
 
@@ -74,6 +80,7 @@ class ApplicationController extends Controller
       $resume->user_id = $application->user_id;
       $resume->application_id = $application->id;
       $resume->uuid = Uuid::generate();
+      $resume->filename_original = $fileHandle->getClientOriginalName();
       $resume->save();
     }
     $path = $resume->getResumePath();
