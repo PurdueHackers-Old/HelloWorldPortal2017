@@ -39,7 +39,11 @@ class ApplicationController extends Controller
       return response()->json(['message' => 'insufficient_permissions'],403);
     }
 
-    $application = Application::findOrFail($application_id)->with('user')->with('resume')->first();
+    $application = Application::where('id',$application_id)->with('user')->with('resume')->first();
+    if(count($application) == 0) {
+      //This app does not exist
+      return response()->json(['message' => 'invalid_id'],404);
+    }
     //Generate a url to the resume
     if(count($application->resume) > 0) {
       //There is a resume uploaded
