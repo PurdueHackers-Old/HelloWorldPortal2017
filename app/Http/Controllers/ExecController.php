@@ -68,9 +68,9 @@ class ExecController extends Controller
       $fileContent = "DID NOT publish application status due to warnings!";
       $fileContent .= "\nTime: ".Carbon::now()->timezone("EST")->format("Y-m-d H:i:s");
       $fileContent .= "\n\nAffected Applications:\n".json_encode($warningApplications);
-      Storage::put($filename,$fileContent);
+      Storage::disk('local')->put($filename,$fileContent);
       return response()->json(['message' => 'warning', 'applications' =>
-        $warningApplications, 'details' => "These users are about to have their status changed from accepted to waitlisted or rejected. This should not happen!"]);
+        $warningApplications, 'details' => "These users are about to have their status changed from accepted to waitlisted or rejected. This should not happen!"],400);
     }
 
     //Publish the statuses
@@ -87,7 +87,7 @@ class ExecController extends Controller
     $fileContent = "PUBLISHING application status!";
     $fileContent .= "\nTime: ".Carbon::now()->timezone("EST")->format("Y-m-d H:i:s");
     $fileContent .= "\n\nAffected Users:\n".json_encode($response);
-    Storage::put($filename,$fileContent);
+    Storage::disk('local')->put($filename,$fileContent);
 
     return response()->json(['message' => 'success','data' => $response]);
   }
