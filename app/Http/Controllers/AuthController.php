@@ -27,7 +27,7 @@ class AuthController extends Controller
       'password'   => 'required',
     ]);
     if ($validator->fails()) {
-      return ['message' => 'validation', 'errors' => $validator->errors()];
+      return response()->json(['message' => 'validation', 'errors' => $validator->errors()], 400);
     }
     $email = $request->email;
     if (Auth::attempt(['email' => $email, 'password' => $request->password])) {
@@ -51,7 +51,7 @@ class AuthController extends Controller
       'password'    => 'required',
     ]);
     if ($validator->fails()) {
-      return ['message' => 'validation', 'errors' => $validator->errors()];
+      return response()->json(['message' => 'validation', 'errors' => $validator->errors()], 400);
     }
 
     $baseRole = Role::where('name','user')->first();
@@ -62,8 +62,7 @@ class AuthController extends Controller
     //Require people to register with a purdue email
     if(strpos($request->email,"@purdue.edu") === false) {
       $validator->getMessageBag()->add('email', 'Email must be a purdue email address');
-      return ['message' => 'validation', 'errors' => $validator->errors()];
-      // return response()->json(['message' => 'You must register using your purdue email address'], 400);
+      return response()->json(['message' => 'validation', 'errors' => $validator->errors()], 400);
     }
 
     $user = new User;
@@ -87,7 +86,7 @@ class AuthController extends Controller
       'email' => 'required|email|exists:users,email',
     ]);
     if ($validator->fails()) {
-      return ['message' => 'error', 'errors' => $validator->errors()->all()];
+      return response()->json(['message' => 'validation', 'errors' => $validator->errors()], 400);
     }
     $user = User::where('email', $request->email)->first();
     $user->sendPasswordResetEmail();
@@ -101,7 +100,7 @@ class AuthController extends Controller
       'password' => 'required',
     ]);
     if ($validator->fails()) {
-      return ['message' => 'validation', 'errors' => $validator->errors()];
+      return response()->json(['message' => 'validation', 'errors' => $validator->errors()], 400);
     }
 
     $token = $request->token;
@@ -141,7 +140,7 @@ class AuthController extends Controller
       'token' => 'required',
     ]);
     if ($validator->fails()) {
-      return ['message' => 'error', 'errors' => $validator->errors()->all()];
+      return response()->json(['message' => 'validation', 'errors' => $validator->errors()], 400);
     }
     ;
     $password = $request->password;
