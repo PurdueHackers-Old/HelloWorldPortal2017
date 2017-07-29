@@ -70,4 +70,20 @@ class UserTest extends TestCase
     $this->post('/api/user/auth',['email' => 'noreply@purdue.edu', 'password' => $newPassword])
       ->assertJson(['message' => 'success']);
     }
+
+  public function testInterestForm() {
+    //Ask to get the interest email
+    $this->post('/api/user/interest',['email' => 'notanemail'])
+      ->assertStatus(400);
+
+      $this->assertDatabaseMissing('interest',['email' => 'noreply@purdue.edu']);
+
+      //Ask to get the interest email
+      $this->post('/api/user/interest',['email' => 'noreply@purdue.edu'])
+        ->assertJson(['message' => 'success'])
+        ->assertStatus(200);
+
+      $this->assertDatabaseHas('interest',['email' => 'noreply@purdue.edu']);
+
+      }
 }
