@@ -10,7 +10,9 @@ use Auth;
 use App\Models\Role;
 use App\Models\PasswordReset;
 use App\Models\EmailVerification;
+use App\Models\InterestSignup;
 use Carbon\Carbon;
+use Mail;
 
 class AuthController extends Controller
 {
@@ -158,5 +160,28 @@ class AuthController extends Controller
     $verification->delete();
 
     return ['message' => 'success'];
+  }
+
+  public function subscribeToInterest(Request $request) {
+    $validator = Validator::make($request->all(), [
+      'email' => 'required|email',
+    ]);
+    if ($validator->fails()) {
+      return response()->json(['message' => 'validation', 'errors' => $validator->errors()], 400);
+    }
+
+    //Save this email for later
+    $signup = InterestSignup::where(['email' => $request->email])->first();
+    if(count($signup) >= 1) {
+      //They already signed up
+      return response()->json(['message' => 'success']);
+    }
+    $signup = new InterestSignup;
+    $signup->email = $request->email;
+    $signup->save();
+
+    // Send an email right now to confirm
+    Mail::to($signup->email)->queue(new \App\Mail\InterestMail());
+    return response()->json(['message' => 'success']);
   }
 }

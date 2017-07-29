@@ -23,6 +23,8 @@ Route::post('user/auth', 'AuthController@login');
 Route::post('user/requestPasswordReset', 'AuthController@sendPasswordReset');
 Route::post('user/confirmPasswordReset', 'AuthController@performPasswordReset');
 
+Route::post('user/interest', 'AuthController@subscribeToInterest');
+
 
 //Authenticated Routes
 Route::group(['middleware' => 'jwt.auth'], function() {
