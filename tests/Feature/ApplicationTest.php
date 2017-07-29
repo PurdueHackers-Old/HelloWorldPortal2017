@@ -210,4 +210,41 @@ class ApplicationTest extends TestCase
     $this->assertDatabaseHas('applications',['user_id' => $this->adminUser->id, 'status_public' => 'accepted', 'status_internal' => 'rejected']);
 
   }
+
+  public function testVerifyEmail() {
+    //User should be unverified
+    $this->assertDatabaseHas('users',['email' => 'noreply@purdue.edu', 'verified' => false]);
+
+    //Request a email verification
+    $this->actingAs($this->user)
+    ->post('api/user/resendVerificationEmail',[],
+    ['Authorization' => 'Bearer '.$this->token])
+    ->assertJson(['message' => 'success']);
+    $this->assertDatabaseHas('emailverification',['user_id' => $this->user->id]);
+
+    //Try to verify email with a bad token
+    $this->actingAs($this->user)
+    ->post('api/user/confirmEmail',['token' => 'invalid_token'],
+    ['Authorization' => 'Bearer '.$this->token])
+    ->assertJson(['message' => 'invalid_token']);
+
+    $newToken = \App\Models\EmailVerification::where('user_id',$this->user->id)->first();
+
+    //Try to verify email with a good token
+    $this->actingAs($this->user)
+    ->post('api/user/confirmEmail',['token' => $newToken->token],
+    ['Authorization' => 'Bearer '.$this->token])
+    ->assertJson(['message' => 'success']);
+
+    //Make sure the email verification has been deleted
+    $this->assertDatabaseMissing('emailverification',['user_id' => $this->user->id]);
+    //User should now be unverified
+    $this->assertDatabaseHas('users',['email' => 'noreply@purdue.edu', 'verified' => true]);
+
+    //User should not be able to re-verify
+    $this->actingAs($this->user)
+    ->post('api/user/resendVerificationEmail',[],
+    ['Authorization' => 'Bearer '.$this->token])
+    ->assertStatus(400);
+  }
 }

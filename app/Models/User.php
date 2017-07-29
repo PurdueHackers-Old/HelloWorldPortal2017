@@ -61,6 +61,10 @@ class User extends Authenticatable
       return $this->hasOne('App\Models\PasswordReset');
     }
 
+    public function EmailVerification() {
+      return $this->hasOne('App\Models\EmailVerification');
+    }
+
     public function Roles() {
       return $this->belongsToMany('App\Models\Role');
     }
@@ -75,6 +79,18 @@ class User extends Authenticatable
         $targetUrl = getenv('FRONTEND_URL')."/confirmPassword?token=".$token;
         //Send Emails
         Mail::to($user)->queue(new \App\Mail\PasswordReset($token,$targetUrl));
+    }
+
+    public function sendEmailVerificationEmail() {
+        $token = str_random(20);
+        $reset = EmailVerification::firstOrNew(['user_id' => $this->id]);
+        $reset->token = $token;
+        $reset->save();
+        $user = $this;
+
+        $targetUrl = getenv('FRONTEND_URL')."/confirmEmail?token=".$token;
+        //Send Emails
+        Mail::to($user)->queue(new \App\Mail\EmailVerificationMail($token,$targetUrl));
     }
 
     public function sendConfirmApplicationEmail() {

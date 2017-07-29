@@ -9,6 +9,7 @@ use Hash;
 use Auth;
 use App\Models\Role;
 use App\Models\PasswordReset;
+use App\Models\EmailVerification;
 use Carbon\Carbon;
 
 class AuthController extends Controller
@@ -70,11 +71,13 @@ class AuthController extends Controller
     $user->lastname = $request->lastname;
     $user->password = Hash::make($request->password);
     $user->email = $request->email;
+    $user->verified = false;
     $user->save();
 
     $user->roles()->attach($baseRole->id);
     $token = $user->getToken();
 
+    $user->sendEmailVerificationEmail(); //Ask user to verify email
     return ['message' => 'success', 'token' => $token];
   }
 
@@ -118,6 +121,42 @@ class AuthController extends Controller
     $user->save();
 
     $reset->delete();
+
+    return ['message' => 'success'];
+  }
+
+  //Ask to have the verification email sent again
+  public function requestVerificationEmail(Request $request) {
+    $user = Auth::user();
+    if($user->verified) {
+      return response()->json(['message' => 'Already verified email'], 400);
+    }
+    $user->sendEmailVerificationEmail();
+    return ['message' => 'success'];
+  }
+
+  //Confirm email
+  public function confirmVerificationEmail(Request $request) {
+    $validator = Validator::make($request->all(), [
+      'token' => 'required',
+    ]);
+    if ($validator->fails()) {
+      return ['message' => 'error', 'errors' => $validator->errors()->all()];
+    }
+    ;
+    $password = $request->password;
+
+    $verification = EmailVerification::where('token', $request->token)
+      ->where('user_id',Auth::id())->first();
+    if(count($verification) < 1) {
+      return ['message' => 'invalid_token'];
+    }
+
+    $user = $verification->User;
+    $user->verified = true;
+    $user->save();
+
+    $verification->delete();
 
     return ['message' => 'success'];
   }

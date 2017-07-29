@@ -15,8 +15,8 @@ class UsersTableSeeder extends Seeder
       if (App::isLocal()) {
           echo "App is running locally, created debug users.\n";
           $data = array(
-            ['id' => 1, 'firstname' => 'Jack', 'lastname' => 'Jackson', 'email' => 'admin@noreply.com', 'password' => Hash::make('password123')],
-            ['id' => 2, 'firstname' => 'John', 'lastname' => 'Johnson', 'email' => 'user@noreply.com', 'password' => Hash::make('password123')],
+            ['id' => 1, 'firstname' => 'Jack', 'lastname' => 'Jackson', 'email' => 'admin@noreply.com', 'password' => Hash::make('password123'), 'verified' => false],
+            ['id' => 2, 'firstname' => 'John', 'lastname' => 'Johnson', 'email' => 'user@noreply.com', 'password' => Hash::make('password123'), 'verified' => false],
           );
           DB::table('users')->insert($data);
 

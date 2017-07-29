@@ -26,6 +26,10 @@ Route::post('user/confirmPasswordReset', 'AuthController@performPasswordReset');
 
 //Authenticated Routes
 Route::group(['middleware' => 'jwt.auth'], function() {
+	//Email Confirmation
+	Route::post('user/resendVerificationEmail', 'AuthController@requestVerificationEmail');
+	Route::post('user/confirmEmail', 'AuthController@confirmVerificationEmail');
+
 	//Create & Edit Applications
 	Route::get('user/application', 'ApplicationController@getSelfApplications');
 	Route::post('user/apply', 'ApplicationController@createApplication');

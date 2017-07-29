@@ -68,5 +68,6 @@ class UserTest extends TestCase
 
     //Try to log in with the new password
     $this->post('/api/user/auth',['email' => 'noreply@purdue.edu', 'password' => $newPassword])
-      ->assertJson(['message' => 'success']);  }
+      ->assertJson(['message' => 'success']);
+    }
 }
