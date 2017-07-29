@@ -76,7 +76,7 @@ class User extends Authenticatable
         $reset->save();
         $user = $this;
 
-        $targetUrl = getenv('FRONTEND_URL')."/confirmPassword?token=".$token;
+        $targetUrl = getenv('FRONTEND_URL')."/#/confirmPassword?token=".$token;
         //Send Emails
         Mail::to($user)->queue(new \App\Mail\PasswordReset($token,$targetUrl));
     }
@@ -88,7 +88,7 @@ class User extends Authenticatable
         $reset->save();
         $user = $this;
 
-        $targetUrl = getenv('FRONTEND_URL')."/confirmEmail?token=".$token;
+        $targetUrl = getenv('FRONTEND_URL')."/#/confirmEmail?token=".$token;
         //Send Emails
         Mail::to($user)->queue(new \App\Mail\EmailVerificationMail($token,$targetUrl));
     }
