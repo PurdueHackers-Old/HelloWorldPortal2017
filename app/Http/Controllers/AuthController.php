@@ -184,4 +184,32 @@ class AuthController extends Controller
     Mail::to($signup->email)->queue(new \App\Mail\InterestMail());
     return response()->json(['message' => 'success']);
   }
+
+  public function getInterestSignups(Request $request) {
+    //User must be an admin to view these emails
+    if(!PermissionsController::hasRole('admin')) {
+      return response()->json(['message' => 'insufficient_permissions']);
+    }
+
+    //Save this email for later
+    $signups = InterestSignup::get();
+    return response()->json(['message' => 'success', 'signups' => $signups]);
+  }
+
+  public function getEmailSuggestions(Request $request) {
+    //User must be an admin to view these emails
+    if(!PermissionsController::hasRole('admin')) {
+      return response()->json(['message' => 'insufficient_permissions']);
+    }
+
+    $validator = Validator::make($request->all(), [
+      'searchvalue' => 'required',
+    ]);
+    if ($validator->fails()) {
+      return response()->json(['message' => 'validation', 'errors' => $validator->errors()], 400);
+    }
+
+    $results = User::where('email', 'LIKE', $request->searchvalue.'%')->limit(10)->get();
+    return response()->json(['message' => 'success', 'users' => $results], 200);
+  }
 }

@@ -51,6 +51,6 @@ Route::group(['middleware' => 'jwt.auth'], function() {
 	Route::post('/exec/publishStatus', 'ExecController@publishApplicationStatus');
 	Route::get('/exec/statistics', 'ExecController@getStatistics');
 	Route::get('/exec/nextApplication', 'ExecController@getNextApp');
+	Route::post('user/search', 'AuthController@getEmailSuggestions');
+	Route::get('user/interest', 'AuthController@getInterestSignups');
 });
-
-//TODO- Day-Of (announcements, tech talks, checkin, etc...)
