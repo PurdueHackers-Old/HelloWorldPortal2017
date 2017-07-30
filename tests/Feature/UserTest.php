@@ -8,10 +8,26 @@ use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use App\Models\PasswordReset;
 use App\Models\User;
+use App\Models\Role;
 
 class UserTest extends TestCase
 {
   use DatabaseTransactions;
+
+  //Mock a sample user and get a token
+  public function getAdminAuthToken()
+  {
+    //Register a sample user
+    $user = factory(\App\Models\User::class)->create([
+      'firstname' => 'Test',
+      'lastname' => 'Admin',
+      'email' => 'noreply1@purdue.edu',
+    ]);
+    $user->roles()->attach(Role::where('name','admin')->first()->id);
+
+    $response = $this->call('POST','/api/user/auth',['email' => 'noreply1@purdue.edu', 'password' => 'secret']);
+    return json_decode($response->getContent(),true)['token'];
+  }
 
   public function testRegister()
   {
@@ -72,18 +88,50 @@ class UserTest extends TestCase
     }
 
   public function testInterestForm() {
-    //Ask to get the interest email
+    //Try invalid email
     $this->post('/api/user/interest',['email' => 'notanemail'])
       ->assertStatus(400);
 
-      $this->assertDatabaseMissing('interest',['email' => 'noreply@purdue.edu']);
+    $this->assertDatabaseMissing('interest',['email' => 'noreply@purdue.edu']);
 
-      //Ask to get the interest email
-      $this->post('/api/user/interest',['email' => 'noreply@purdue.edu'])
-        ->assertJson(['message' => 'success'])
-        ->assertStatus(200);
+    //Signup for interest email
+    $this->post('/api/user/interest',['email' => 'noreply@purdue.edu'])
+      ->assertJson(['message' => 'success'])
+      ->assertStatus(200);
 
-      $this->assertDatabaseHas('interest',['email' => 'noreply@purdue.edu']);
+    $this->assertDatabaseHas('interest',['email' => 'noreply@purdue.edu']);
 
-      }
+    //Try with an an admin user
+    $token = UserTest::getAdminAuthToken();
+
+    //Try getting all interest signups
+    $this->get('api/user/interest',['HTTP_Authorization' => 'Bearer '.$token])
+    ->assertJson(['message' => 'success'])
+    ->assertJsonFragment(['email' => 'noreply@purdue.edu']);
+  }
+
+  public function testSearchForm() {
+    //Get an admin user
+    $token = UserTest::getAdminAuthToken();
+
+    //Try to search with missing params
+    $this->post('/api/user/search',[],['HTTP_Authorization' => 'Bearer '.$token])
+      ->assertStatus(400);
+
+    //Try to search
+    $this->post('/api/user/search',['searchvalue' => 'noreply@purdue.edu'],
+    ['HTTP_Authorization' => 'Bearer '.$token])
+      ->assertJsonFragment(['message' => 'success'])
+      ->assertStatus(200);
+
+    //Register a user
+    $this->post('/api/user/register',['firstname' => 'Test', 'lastname' => 'user', 'email' => 'noreply@purdue.edu', 'password' => 'password123'])
+      ->assertJson(['message' => 'success']);
+
+    //Try to search again
+    $this->post('/api/user/search',['searchvalue' => 'noreply@purdue.edu'],
+    ['HTTP_Authorization' => 'Bearer '.$token])
+      ->assertJsonFragment(['message' => 'success', 'email' => 'noreply@purdue.edu'])
+      ->assertStatus(200);
+  }
 }
