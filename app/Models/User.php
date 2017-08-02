@@ -6,6 +6,7 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use JWTAuth;
 use Mail;
+use Auth;
 
 class User extends Authenticatable
 {
@@ -99,5 +100,7 @@ class User extends Authenticatable
         Mail::to($user)->queue(new \App\Mail\ConfirmApp($user));
     }
 
-
+    public function hasVerifiedEmail() {
+      return !(Auth::user()->verified == null || !Auth::user()->verified);
+    }
 }

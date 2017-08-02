@@ -128,24 +128,27 @@ class AuthController extends Controller
 
   //Ask to have the verification email sent again
   public function requestVerificationEmail(Request $request) {
-    $user = Auth::user();
-    if($user->verified) {
+    if(PermissionsController::hasVerifiedEmail()) {
       return response()->json(['message' => 'Already verified email'], 400);
     }
+    $user = Auth::user();
     $user->sendEmailVerificationEmail();
     return ['message' => 'success'];
   }
 
   //Confirm email
   public function confirmVerificationEmail(Request $request) {
+    //Check to make sure user didn't already verify
+    if(PermissionsController::hasVerifiedEmail()) {
+      return response()->json(['message' => 'Already verified email'], 400);
+    }
+
     $validator = Validator::make($request->all(), [
       'token' => 'required',
     ]);
     if ($validator->fails()) {
       return response()->json(['message' => 'validation', 'errors' => $validator->errors()], 400);
     }
-    ;
-    $password = $request->password;
 
     $verification = EmailVerification::where('token', $request->token)
       ->where('user_id',Auth::id())->first();

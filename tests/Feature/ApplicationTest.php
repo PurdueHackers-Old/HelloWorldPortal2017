@@ -69,9 +69,20 @@ class ApplicationTest extends TestCase
   }
 
   public function testSubmitApplication() {
-    //Check invalid application
     $appData = ApplicationTest::buildValidApp();
     $appData['major'] = ""; //Invalid major
+
+    //Check application with unverified email
+    $this->actingAs($this->user)
+    ->post('api/user/apply',$appData,
+    ['Authorization' => 'Bearer '.$this->token])
+    ->assertJson(['message' => 'unverified_email']);
+
+    //Verify user email
+    $this->user->verified = true;
+    $this->user->save();
+
+    //Check invalid application
     $this->actingAs($this->user)
     ->post('api/user/apply',$appData,
     ['Authorization' => 'Bearer '.$this->token])
@@ -110,6 +121,10 @@ class ApplicationTest extends TestCase
   }
 
   public function testUpdateApplication() {
+    //Verify user email
+    $this->user->verified = true;
+    $this->user->save();
+    
     //Create valid application
     $appData = ApplicationTest::buildValidApp();
     $this->actingAs($this->user)
@@ -129,6 +144,10 @@ class ApplicationTest extends TestCase
   }
 
   public function testExecApplicationActions() {
+
+    //Verify user email
+    $this->adminUser->verified = true;
+    $this->adminUser->save();
 
     //Create valid application
     $appData = ApplicationTest::buildValidApp();
@@ -160,7 +179,9 @@ class ApplicationTest extends TestCase
   }
 
   public function testExecApplicationAcceptances() {
-
+    //Verify user email
+    $this->adminUser->verified = true;
+    $this->adminUser->save();
     //Create valid application
     $appData = ApplicationTest::buildValidApp();
     $this->actingAs($this->adminUser)

@@ -19,4 +19,17 @@ class PermissionsController extends Controller
       }
       return true;
   }
+
+  /**
+   * Checks the logged in user to make sure they have
+   * a verified email.
+   * Returns true if the user has verified their email, false otherwise.
+   */
+  public static function hasVerifiedEmail() {
+      $user = Auth::user();
+      if($user == null || $user->hasVerifiedEmail() == false) {
+          return false;
+      }
+      return true;
+  }
 }

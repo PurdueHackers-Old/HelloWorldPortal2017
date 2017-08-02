@@ -99,6 +99,18 @@ class ApplicationController extends Controller
 
   //Submits a new application
   public function createApplication(Request $request) {
+
+    //Do not let user apply if they havent validate email address
+    //Check to make sure user didn't already verify
+    if(!PermissionsController::hasVerifiedEmail()) {
+      return response()->json(['message' => 'unverified_email'],400);
+    }
+
+    //Make sure user has not already applied
+    if(count(Auth::user()->application) > 0) {
+      return response()->json(['message' => 'application_already_exists'],400);
+    }
+
     $validator = Validator::make($request->all(), [
       'class_year' => 'required|in:freshman,sophomore,junior,senior',
       'grad_year' => 'required|in:2017,2018,2019,2020,2021,2022,2023,2024,2025',
@@ -114,11 +126,6 @@ class ApplicationController extends Controller
 
     if ($validator->fails()) {
         return response()->json(['message' => 'validation', 'errors' => $validator->errors()],400);
-    }
-
-    //Make sure user has not already applied
-    if(count(Auth::user()->application) > 0) {
-      return response()->json(['message' => 'application_already_exists'],400);
     }
 
     //Validate filetype
