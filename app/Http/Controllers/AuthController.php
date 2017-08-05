@@ -85,13 +85,17 @@ class AuthController extends Controller
   //Request password reset token
   public function sendPasswordReset(Request $request) {
     $validator = Validator::make($request->all(), [
-      'email' => 'required|email|exists:users,email',
+      'email' => 'required|email',
     ]);
     if ($validator->fails()) {
       return response()->json(['message' => 'validation', 'errors' => $validator->errors()], 400);
     }
     $user = User::where('email', $request->email)->first();
-    $user->sendPasswordResetEmail();
+
+    if(count($user) == 1) {
+      //This is a valid email
+      $user->sendPasswordResetEmail();
+    }
     return ['message' => 'success'];
   }
 
