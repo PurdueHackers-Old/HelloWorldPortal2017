@@ -142,11 +142,6 @@ class AuthController extends Controller
 
   //Confirm email
   public function confirmVerificationEmail(Request $request) {
-    //Check to make sure user didn't already verify
-    if(PermissionsController::hasVerifiedEmail()) {
-      return response()->json(['message' => 'Already verified email'], 400);
-    }
-
     $validator = Validator::make($request->all(), [
       'token' => 'required',
     ]);
@@ -154,8 +149,7 @@ class AuthController extends Controller
       return response()->json(['message' => 'validation', 'errors' => $validator->errors()], 400);
     }
 
-    $verification = EmailVerification::where('token', $request->token)
-      ->where('user_id',Auth::id())->first();
+    $verification = EmailVerification::where('token', $request->token)->first();
     if(count($verification) < 1) {
       return ['message' => 'invalid_token'];
     }

@@ -22,6 +22,7 @@ Route::post('user/register', 'AuthController@register');
 Route::post('user/auth', 'AuthController@login');
 Route::post('user/requestPasswordReset', 'AuthController@sendPasswordReset');
 Route::post('user/confirmPasswordReset', 'AuthController@performPasswordReset');
+Route::post('user/confirmEmail', 'AuthController@confirmVerificationEmail');
 
 Route::post('user/interest', 'AuthController@subscribeToInterest');
 
@@ -30,7 +31,6 @@ Route::post('user/interest', 'AuthController@subscribeToInterest');
 Route::group(['middleware' => 'jwt.auth'], function() {
 	//Email Confirmation
 	Route::post('user/resendVerificationEmail', 'AuthController@requestVerificationEmail');
-	Route::post('user/confirmEmail', 'AuthController@confirmVerificationEmail');
 
 	//Create & Edit Applications
 	Route::get('user/application', 'ApplicationController@getSelfApplications');
