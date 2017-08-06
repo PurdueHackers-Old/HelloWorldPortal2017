@@ -42,6 +42,7 @@ class User extends Authenticatable
           'email' => $this->email,
           'firstname' => $this->firstname,
           'lastname' => $this->lastname,
+          'verified' => $this->verified,
           'roles' => $formattedRoles
         ]);
     }
