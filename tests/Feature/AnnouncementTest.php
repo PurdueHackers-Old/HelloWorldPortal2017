@@ -88,11 +88,13 @@ class AnnouncementTest extends TestCase
 
   public function testAnnouncementsAdmin() {
     $announcementTest = "this is a test announcement";
+    $announcementTestTitle = "Announcement Title";
 
     //Try posting an invalid auth token
     $this->actingAs($this->adminUser)
       ->post('api/announcements',[
         'message' => $announcementTest,
+        'title' => $announcementTestTitle
       ],
       ['Authorization' => 'Bearer '.$this->adminToken])
       ->assertJson(['message' => 'validation'])
@@ -102,6 +104,7 @@ class AnnouncementTest extends TestCase
     $this->actingAs($this->adminUser)
       ->post('api/announcements',[
         'message' => $announcementTest,
+        'title' => $announcementTestTitle,
         'should_email' => 'false'
       ],
       ['Authorization' => 'Bearer '.$this->adminToken])

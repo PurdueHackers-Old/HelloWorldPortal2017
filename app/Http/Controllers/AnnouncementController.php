@@ -39,6 +39,7 @@ class AnnouncementController extends Controller
     }
     $validator = Validator::make($request->all(), [
       'message' => 'required',
+      'title' => 'required',
       'should_email' => 'required|in:true,false',
     ]);
     if ($validator->fails()) {
@@ -47,6 +48,7 @@ class AnnouncementController extends Controller
     $announcement = new Announcement;
     $announcement->user_id = Auth::id();
     $announcement->message = $request->message;
+    $announcement->title = $request->title;
     $announcement->save();
 
     if($request->should_email == "true") {
