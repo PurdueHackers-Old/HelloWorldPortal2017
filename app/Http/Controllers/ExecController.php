@@ -104,11 +104,15 @@ class ExecController extends Controller
     if ($validator->fails()) {
         return response()->json(['message' => 'validation', 'errors' => $validator->errors()],400);
     }
+    $user = User::where('email',$request->email)->first();
 
-    //TODO- Validate application status here if needed
+    //Make sure user is checked in
+    if(!PermissionsController::userIsAccepted($user)) {
+      $validator->getMessageBag()->add('checkin', 'User must have been accepted to check in.');
+      return response()->json(['message' => 'validation', 'errors' => $validator->errors()],403);
+    }
 
     //Checkin the user
-    $user = User::where('email',$request->email)->first();
     $checkin = $user->checkin;
     if(count($checkin) == 0) {
       //User is just now checking in

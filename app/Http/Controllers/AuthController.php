@@ -210,7 +210,15 @@ class AuthController extends Controller
       return response()->json(['message' => 'validation', 'errors' => $validator->errors()], 400);
     }
 
-    $results = User::where('email', 'LIKE', $request->searchvalue.'%')->limit(10)->get();
-    return response()->json(['message' => 'success', 'users' => $results], 200);
+    $users = User::where('email', 'LIKE', $request->searchvalue.'%')->limit(10)->get();
+    $filteredUsers = [];
+    //Remove users who already checked in or who are not accepted
+    foreach ($users as $user) {
+      if(count($user->application) > 0 && $user->application->status_public == "accepted" && $user->checkin == null) {
+        array_push($filteredUsers,$user);
+      }
+    }
+
+    return response()->json(['message' => 'success', 'users' => $filteredUsers], 200);
   }
 }

@@ -32,4 +32,14 @@ class PermissionsController extends Controller
       }
       return true;
   }
+
+  /**
+   * Checks that the given user is accepted publicly
+   */
+  public static function userIsAccepted($user) {
+      if($user == null || $user->application == null) {
+        return false; //User or applicaton are unset
+      }
+      return ($user->application->status_public == "accepted");
+  }
 }

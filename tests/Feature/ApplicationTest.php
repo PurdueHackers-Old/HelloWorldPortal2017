@@ -124,7 +124,7 @@ class ApplicationTest extends TestCase
     //Verify user email
     $this->user->verified = true;
     $this->user->save();
-    
+
     //Create valid application
     $appData = ApplicationTest::buildValidApp();
     $this->actingAs($this->user)
@@ -267,5 +267,59 @@ class ApplicationTest extends TestCase
     ->post('api/user/resendVerificationEmail',[],
     ['Authorization' => 'Bearer '.$this->token])
     ->assertStatus(400);
+  }
+
+  public function testCheckin() {
+    //Verify user email
+    $this->adminUser->verified = true;
+    $this->adminUser->save();
+
+    //Create valid application
+    $appData = ApplicationTest::buildValidApp();
+    $this->actingAs($this->adminUser)
+    ->post('api/user/apply',$appData,
+    ['Authorization' => 'Bearer '.$this->adminToken])
+    ->assertJson(['message' => 'success']);
+    $this->assertDatabaseHas('applications',['user_id' => $this->adminUser->id]);
+
+    //Check that checkin on an unaccepted user fails
+    $this->actingAs($this->adminUser)
+    ->post('api/exec/checkin',['email' => "noreply1@purdue.edu"],
+    ['Authorization' => 'Bearer '.$this->adminToken])
+    ->assertJson(['message' => 'validation'])
+    ->assertStatus(403);
+    $this->assertDatabaseMissing('checkins',['user_id' => $this->adminUser->id]);
+
+    //Test that searching for the user doesnt show this user
+    $this->actingAs($this->adminUser)
+    ->post('api/user/search',['searchvalue' => 'noreply1'],
+    ['Authorization' => 'Bearer '.$this->adminToken])
+    ->assertJsonMissing(['user_id' => $this->adminUser->id]);
+
+    //Accept the user
+    $this->adminUser->application->status_public = "accepted";
+    $this->adminUser->application->save();
+    $this->assertDatabaseHas('applications',['user_id' => $this->adminUser->id, 'status_public' => 'accepted']);
+
+    //Test that searching for the user works now that they're accpeted
+    $this->actingAs($this->adminUser)
+    ->post('api/user/search',['searchvalue' => 'noreply1'],
+    ['Authorization' => 'Bearer '.$this->adminToken])
+    ->assertJsonFragment(['user_id' => $this->adminUser->id]);
+
+
+    //Test the checkin again now that the user has been accepted
+    $this->actingAs($this->adminUser)
+    ->post('api/exec/checkin',['email' => "noreply1@purdue.edu"],
+    ['Authorization' => 'Bearer '.$this->adminToken])
+    ->assertJson(['message' => 'success'])
+    ->assertStatus(200);
+    $this->assertDatabaseHas('checkins',['user_id' => $this->adminUser->id]);
+
+    //Test that searching for the user doesnt show this user now that they're checked in
+    $this->actingAs($this->adminUser)
+    ->post('api/user/search',['searchvalue' => 'noreply1'],
+    ['Authorization' => 'Bearer '.$this->adminToken])
+    ->assertJsonMissing(['user_id' => $this->adminUser->id]);
   }
 }
