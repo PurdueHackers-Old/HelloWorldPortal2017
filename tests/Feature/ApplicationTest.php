@@ -290,6 +290,10 @@ class ApplicationTest extends TestCase
     ->assertStatus(403);
     $this->assertDatabaseMissing('checkins',['user_id' => $this->adminUser->id]);
 
+    //Try to search with missing params
+    $this->post('/api/user/search',[],['HTTP_Authorization' => 'Bearer '.$this->adminToken])
+      ->assertStatus(400);
+
     //Test that searching for the user doesnt show this user
     $this->actingAs($this->adminUser)
     ->post('api/user/search',['searchvalue' => 'noreply1'],

@@ -109,29 +109,4 @@ class UserTest extends TestCase
     ->assertJson(['message' => 'success'])
     ->assertJsonFragment(['email' => 'noreply@purdue.edu']);
   }
-
-  public function testSearchForm() {
-    //Get an admin user
-    $token = UserTest::getAdminAuthToken();
-
-    //Try to search with missing params
-    $this->post('/api/user/search',[],['HTTP_Authorization' => 'Bearer '.$token])
-      ->assertStatus(400);
-
-    //Try to search
-    $this->post('/api/user/search',['searchvalue' => 'noreply@purdue.edu'],
-    ['HTTP_Authorization' => 'Bearer '.$token])
-      ->assertJsonFragment(['message' => 'success'])
-      ->assertStatus(200);
-
-    //Register a user
-    $this->post('/api/user/register',['firstname' => 'Test', 'lastname' => 'user', 'email' => 'noreply@purdue.edu', 'password' => 'password123'])
-      ->assertJson(['message' => 'success']);
-
-    //Try to search again
-    $this->post('/api/user/search',['searchvalue' => 'noreply@purdue.edu'],
-    ['HTTP_Authorization' => 'Bearer '.$token])
-      ->assertJsonFragment(['message' => 'success', 'email' => 'noreply@purdue.edu'])
-      ->assertStatus(200);
-  }
 }
