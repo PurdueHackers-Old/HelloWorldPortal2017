@@ -24,19 +24,21 @@ class Resume extends Model
  * for a short period
  */
   public function getPreSignedUrl() {
-    if(getenv('FILESYSTEM_DRIVER','local') == 'local') {
-      //App is running locally, can't provide real url
+    if(getenv('FILESYSTEM_DRIVER') == "s3") {
+      $client = Storage::disk('s3')->getDriver()->getAdapter()->getClient();
+      $expiry = "+10 minutes";
+      $path = $this->getResumePath();
+      $command = $client->getCommand('GetObject', [
+          'Bucket' => env('AWS_BUCKET'),
+          'Key'    => $path
+      ]);
+      $request = $client->createPresignedRequest($command, $expiry);
+      return (string) $request->getUri();
+    } else {
+      //App is not configured to use S3
       return "http://localhost";
     }
-    $client = Storage::disk('s3')->getDriver()->getAdapter()->getClient();
-    $expiry = "+10 minutes";
-    $path = $this->getResumePath();
-    $command = $client->getCommand('GetObject', [
-        'Bucket' => env('AWS_BUCKET'),
-        'Key'    => $path
-    ]);
-    $request = $client->createPresignedRequest($command, $expiry);
-    return (string) $request->getUri();
+
   }
 
 }
