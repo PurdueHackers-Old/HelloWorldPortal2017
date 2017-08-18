@@ -1,1 +1,2 @@
-Please click <a href="{{$url}}">here</a> to confirm your email for Hello World.<br><br>
+Please use the link below to confirm your email for Hello World.<br><br>
+{{$url}}

@@ -1,1 +1,2 @@
-Please click <a href="{{$url}}">here</a> to reset your password for Hello World.<br><br>
+Please use the link below to reset your password for Hello World.<br><br>
+{{$url}}
