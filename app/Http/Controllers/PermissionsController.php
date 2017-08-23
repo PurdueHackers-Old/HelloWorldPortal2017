@@ -42,4 +42,13 @@ class PermissionsController extends Controller
       }
       return ($user->application->status_public == "accepted");
   }
+
+  public static function checkApplicationMode($mode) {
+    $currentMode = getenv('APPLICATION_MODE');
+    if($currentMode == false) {
+      return false;
+    } else {
+      return (strcasecmp($currentMode,$mode) == 0);
+    }
+  }
 }

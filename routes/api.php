@@ -25,6 +25,7 @@ Route::post('user/confirmPasswordReset', 'AuthController@performPasswordReset');
 Route::post('user/confirmEmail', 'AuthController@confirmVerificationEmail');
 
 Route::post('user/interest', 'AuthController@subscribeToInterest');
+Route::get('applications/mode', 'ApplicationController@getApplicationMode');
 
 
 //Authenticated Routes

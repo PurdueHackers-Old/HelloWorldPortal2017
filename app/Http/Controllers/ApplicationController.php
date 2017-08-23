@@ -128,6 +128,12 @@ class ApplicationController extends Controller
         return response()->json(['message' => 'validation', 'errors' => $validator->errors()],400);
     }
 
+    //Fail if applications are closed
+    if(!PermissionsController::checkApplicationMode("OPEN")) {
+      $validator->getMessageBag()->add('application_mode', 'Applications are not open');
+      return response()->json(['message' => 'validation', 'errors' => $validator->errors()],403);
+    }
+
     //Validate filetype
     if($request->resume
       && !$this->validateFile($request->file('resume'))) {
@@ -261,6 +267,19 @@ class ApplicationController extends Controller
     }
     $application->save();
     return response()->json(['message' => 'success', 'application' => $application->with('user')->get()]);
+  }
+
+  public function getApplicationMode() {
+    switch(getenv('APPLICATION_MODE')) {
+      case "INTEREST":
+        return response()->json(['message' => 'success', 'status' => 'interest']);
+      case "OPEN":
+        return response()->json(['message' => 'success', 'status' => 'open']);
+      case "CLOSED":
+        return response()->json(['message' => 'success', 'status' => 'closed']);
+      default:
+        return response()->json(['message' => 'error', 'status' => 'Unknown application mode'],400);
+    }
   }
 
 

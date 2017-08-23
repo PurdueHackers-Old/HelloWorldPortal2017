@@ -89,6 +89,17 @@ class ApplicationTest extends TestCase
     ->assertJson(['message' => 'validation']);
     $this->assertDatabaseMissing('applications',['user_id' => $this->user->id]);
 
+    //Check that application fails if they're closed
+    putenv("APPLICATION_MODE=CLOSED");
+    $appData = ApplicationTest::buildValidApp();
+    $this->actingAs($this->user)
+    ->post('api/user/apply',$appData,
+    ['Authorization' => 'Bearer '.$this->token])
+    ->assertJsonFragment(['message' => 'validation','application_mode' => ['Applications are not open']]);
+    $this->assertDatabaseMissing('applications',['user_id' => $this->user->id]);
+    putenv("APPLICATION_MODE=OPEN");
+
+
     //Check valid application
     $appData = ApplicationTest::buildValidApp();
     $this->actingAs($this->user)
