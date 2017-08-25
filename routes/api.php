@@ -32,6 +32,7 @@ Route::get('applications/mode', 'ApplicationController@getApplicationMode');
 Route::group(['middleware' => 'jwt.auth'], function() {
 	//Email Confirmation
 	Route::post('user/resendVerificationEmail', 'AuthController@requestVerificationEmail');
+	Route::get('user/isverified', 'AuthController@checkVerifiedEmail');
 
 	//Create & Edit Applications
 	Route::get('user/application', 'ApplicationController@getSelfApplications');

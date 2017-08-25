@@ -221,4 +221,10 @@ class AuthController extends Controller
 
     return response()->json(['message' => 'success', 'users' => $filteredUsers], 200);
   }
+
+
+    //Check to see if the user has verified their email
+    public function checkVerifiedEmail() {
+      return response()->json(['message' => 'success', 'verified' => Auth::user()->verified], 200);
+    }
 }
