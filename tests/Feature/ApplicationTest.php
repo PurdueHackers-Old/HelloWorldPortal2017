@@ -78,9 +78,21 @@ class ApplicationTest extends TestCase
     ['Authorization' => 'Bearer '.$this->token])
     ->assertJson(['message' => 'unverified_email']);
 
+    //Check verification route
+    $this->actingAs($this->user)
+    ->get('api/user/isverified',$appData,
+    ['Authorization' => 'Bearer '.$this->token])
+    ->assertJson(['message' => 'success', 'verified' => 0]);
+
     //Verify user email
     $this->user->verified = true;
     $this->user->save();
+
+    //Check verification route
+    $this->actingAs($this->user)
+    ->get('api/user/isverified',$appData,
+    ['Authorization' => 'Bearer '.$this->token])
+    ->assertJson(['message' => 'success', 'verified' => 1]);
 
     //Check invalid application
     $this->actingAs($this->user)
