@@ -14,7 +14,7 @@ class AnnouncementController extends Controller
   //Get a list of announcements
   public function getAnnouncements() {
     //Decide which filter to use
-    $announcements = Announcement::get();
+    $announcements = Announcement::orderBy('created_at','desc')->get();
     return response()->json(['message' => 'success',
     'announcements' => $announcements]);
   }
