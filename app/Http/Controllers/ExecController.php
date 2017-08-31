@@ -7,6 +7,7 @@ use Validator;
 use App\Models\Announcement;
 use App\Models\Checkin;
 use App\Models\User;
+use App\Models\Resume;
 use Auth;
 use App\Models\Application;
 use Carbon\Carbon;
@@ -153,6 +154,7 @@ class ExecController extends Controller
       'accepted_public' => Application::where('status_public','accepted')->count(),
       'rejected_public' => Application::where('status_public','rejected')->count(),
       'waitlisted_public' => Application::where('status_public','waitlisted')->count(),
+      'resumes' => Resume::count(),
     ]);
   }
 
