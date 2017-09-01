@@ -13,6 +13,7 @@ use App\Models\Application;
 use Carbon\Carbon;
 use Log;
 use Storage;
+use DB;
 
 class ExecController extends Controller
 {
@@ -142,6 +143,12 @@ class ExecController extends Controller
       return response()->json(['message' => 'insufficient_permissions']);
     }
 
+    $resumeCount = DB::table('resumes')
+      ->join('applications','resumes.application_id','applications.id')
+      ->select('*')
+      ->where('applications.status_internal','accepted')
+      ->count();
+
     return response()->json([
       'message' => 'success',
       'checkins' => Checkin::count(),
@@ -155,6 +162,7 @@ class ExecController extends Controller
       'rejected_public' => Application::where('status_public','rejected')->count(),
       'waitlisted_public' => Application::where('status_public','waitlisted')->count(),
       'resumes' => Resume::count(),
+      'resumes_accepted' => $resumeCount,
     ]);
   }
 
