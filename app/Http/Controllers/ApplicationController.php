@@ -277,6 +277,8 @@ class ApplicationController extends Controller
         return response()->json(['message' => 'success', 'status' => 'open']);
       case "CLOSED":
         return response()->json(['message' => 'success', 'status' => 'closed']);
+      case "DAY_OF":
+        return response()->json(['message' => 'success', 'status' => 'dayof']);
       default:
         return response()->json(['message' => 'error', 'status' => 'Unknown application mode'],400);
     }
