@@ -108,7 +108,7 @@ class ExecController extends Controller
     }
     $user = User::where('email',$request->email)->first();
 
-    //Make sure user is checked in
+    //Make sure user is accepted
     if(!PermissionsController::userIsAccepted($user)) {
       $validator->getMessageBag()->add('checkin', 'User must have been accepted to check in.');
       return response()->json(['message' => 'validation', 'errors' => $validator->errors()],403);
@@ -126,6 +126,32 @@ class ExecController extends Controller
       //User already checked in
       return response()->json(['message' => 'already_checked_in']);
     }
+  }
+
+  public function removeCheckedInUser(Request $request) {
+    //User must be an admin to update checkins
+    if(!PermissionsController::hasRole('admin')) {
+      return response()->json(['message' => 'insufficient_permissions']);
+    }
+
+    $validator = Validator::make($request->all(), [
+      'email' => 'required|exists:users,email',
+    ]);
+    if ($validator->fails()) {
+        return response()->json(['message' => 'validation', 'errors' => $validator->errors()],400);
+    }
+    $user = User::where('email',$request->email)->first();
+
+    //Make sure user is already checked in
+    $checkin = $user->checkin;
+    if(count($checkin) == 0) {
+      $validator->getMessageBag()->add('checkin', 'User is not checked in');
+      return response()->json(['message' => 'validation', 'errors' => $validator->errors()],403);
+    }
+
+    //Delete the checkin for this user
+    $checkin->delete();
+    return response()->json(['message' => 'success'],200);
   }
 
   public function getCheckedInUsers(Request $request) {
