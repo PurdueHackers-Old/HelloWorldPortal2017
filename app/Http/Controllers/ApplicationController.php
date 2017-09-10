@@ -65,7 +65,7 @@ class ApplicationController extends Controller
       return response()->json(['message' => 'insufficient_permissions'],403);
     }
 
-    return Application::with('user')->get();
+    return Application::with('user')->with('resume')->get();
   }
 
 /**
