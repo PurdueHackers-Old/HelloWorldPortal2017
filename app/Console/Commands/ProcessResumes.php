@@ -56,10 +56,10 @@ class ProcessResumes extends Command
     public function handle()
     {
       $this->info('Processing resumes...');
-      $sourcePath = "./storage/app/copied_resumes/resumes/";
-      $destPath = "./storage/app/cleaned_resumes/resumes/";
-      $storagePathInput = "copied_resumes/resumes/";
-      $storagePathOutput = "cleaned_resumes/resumes/";
+      $sourcePath = "./storage/app/copied_resumes/";
+      $destPath = "./storage/app/cleaned_resumes/";
+      $storagePathInput = "copied_resumes/";
+      $storagePathOutput = "cleaned_resumes/";
 
       //Show warning if input files do not already exist
       if(!File::exists($sourcePath)) {

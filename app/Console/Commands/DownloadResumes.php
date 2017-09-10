@@ -48,7 +48,7 @@ class DownloadResumes extends Command
         $this->info('Undefined bucket name! Set AWS_BUCKET env variable');
         return;
       }
-      $downloadCommand = "aws s3 cp --recursive s3://".$bucketName." ".$targetPath;
+      $downloadCommand = "aws s3 cp --recursive s3://".$bucketName."/resumes ".$targetPath;
 
 
       $this->info("Copying resumes from AWS bucket: ".$bucketName);
