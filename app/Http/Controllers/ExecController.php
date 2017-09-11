@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Models\Resume;
 use Auth;
 use App\Models\Application;
+use App\Models\Setting;
 use Carbon\Carbon;
 use Log;
 use Storage;
@@ -108,11 +109,29 @@ class ExecController extends Controller
     }
     $user = User::where('email',$request->email)->first();
 
-    //Make sure user is accepted
-    if(!PermissionsController::userIsAccepted($user)) {
-      $validator->getMessageBag()->add('checkin', 'User must have been accepted to check in.');
-      return response()->json(['message' => 'validation', 'errors' => $validator->errors()],403);
+    //Check the checkin mode
+    if(ExecController::getSetting("checkin_mode") == "accepted_only") {
+      //The user must be accepted
+      if(!PermissionsController::userIsAccepted($user)) {
+        $validator->getMessageBag()->add('checkin', 'User must have been accepted to check in.');
+        return response()->json(['message' => 'validation', 'errors' => $validator->errors()],403);
+      }
+    } else if(ExecController::getSetting("checkin_mode") == "waitlisted_okay") {
+      //Waitlisted is okay too
+      if(!PermissionsController::userIsAcceptedOrWaitlisted($user)) {
+        $validator->getMessageBag()->add('checkin', 'User must have been accepted or waitlisted to check in.');
+        return response()->json(['message' => 'validation', 'errors' => $validator->errors()],403);
+      }
+    } else if(ExecController::getSetting("checkin_mode") == null) {
+      //There is no value defined
+      ExecController::putSetting("checkin_mode","accepted_only"); //Default to accepted only
+      //The user must be accepted
+      if(!PermissionsController::userIsAccepted($user)) {
+        $validator->getMessageBag()->add('checkin', 'User must have been accepted to check in.');
+        return response()->json(['message' => 'validation', 'errors' => $validator->errors()],403);
+      }
     }
+
 
     //Checkin the user
     $checkin = $user->checkin;
@@ -199,4 +218,33 @@ class ExecController extends Controller
     return Application::where('status_internal','pending')->inRandomOrder()->first();
   }
 
+
+  public function getCheckinMode() {
+    //User must be an admin to see this information
+    if(!PermissionsController::hasRole('admin')) {
+      return response()->json(['message' => 'insufficient_permissions']);
+    }
+
+    return response()->json(['message' => 'success','mode' => ExecController::getSetting("checkin_mode")]);
+  }
+
+  public static function getSetting($settingName) {
+    $setting = Setting::where('name',$settingName)->first();
+    if(count($setting) < 1) {
+      return null;
+    } else {
+      return $setting->value;
+    }
+  }
+
+  public static function putSetting($settingName,$settingValue) {
+    $setting = Setting::where('name',$settingName)->first();
+    if(count($setting) < 1) {
+      //This is a new
+      $setting = new Setting;
+      $setting->name = $settingName;
+    }
+    $setting->value = $settingValue;
+    $setting->save();
+  }
 }

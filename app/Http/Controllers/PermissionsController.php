@@ -43,6 +43,13 @@ class PermissionsController extends Controller
       return ($user->application->status_public == "accepted");
   }
 
+  public static function userIsAcceptedOrWaitlisted($user) {
+    if($user == null || $user->application == null) {
+      return false; //User or applicaton are unset
+    }
+    return ($user->application->status_public == "accepted" || $user->application->status_public == "waitlisted");
+  }
+
   public static function checkApplicationMode($mode) {
     $currentMode = getenv('APPLICATION_MODE');
     if($currentMode == false) {

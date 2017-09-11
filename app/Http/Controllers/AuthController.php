@@ -212,12 +212,35 @@ class AuthController extends Controller
 
     $users = User::where('email', 'LIKE', $request->searchvalue.'%')->limit(10)->get();
     $filteredUsers = [];
+
+    $setting = ExecController::getSetting("checkin_mode");
+    $acceptedOnly = true;
+    if($setting == null || $setting == "accepted_only") {
+      $acceptedOnly = true;
+    } else {
+      $acceptedOnly = false;
+    }
+
     //Remove users who already checked in or who are not accepted
-    foreach ($users as $user) {
-      if(count($user->application) > 0 && $user->application->status_public == "accepted" && $user->checkin == null) {
-        array_push($filteredUsers,$user);
+    if($acceptedOnly) {
+      //Allow any user
+      foreach ($users as $user) {
+        if(count($user->application) > 0 && $user->application->status_public == "accepted" && $user->checkin == null) {
+          array_push($filteredUsers,$user);
+        }
+      }
+    } else {
+      //Allow waitlisted users
+      foreach ($users as $user) {
+        if(count($user->application) > 0
+          && ($user->application->status_public == "accepted"
+            || $user->application->status_public == "waitlisted")
+          && $user->checkin == null) {
+          array_push($filteredUsers,$user);
+        }
       }
     }
+
 
     return response()->json(['message' => 'success', 'users' => $filteredUsers], 200);
   }

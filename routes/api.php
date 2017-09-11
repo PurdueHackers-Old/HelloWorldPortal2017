@@ -49,7 +49,9 @@ Route::group(['middleware' => 'jwt.auth'], function() {
 
 	//Exec Board features
 	Route::get('/exec/checkin', 'ExecController@getCheckedInUsers');
+	Route::get('/exec/checkinmode', 'ExecController@getCheckinMode');
 	Route::post('/exec/checkin', 'ExecController@checkinUser');
+
 	Route::post('/exec/removeCheckin', 'ExecController@removeCheckedInUser');
 	Route::post('/exec/publishStatus', 'ExecController@publishApplicationStatus');
 	Route::get('/exec/statistics', 'ExecController@getStatistics');
