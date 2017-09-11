@@ -218,6 +218,31 @@ class ExecController extends Controller
     return Application::where('status_internal','pending')->inRandomOrder()->first();
   }
 
+  public function updateCheckinMode(Request $request) {
+    //User must be an admin to check someone in
+    if(!PermissionsController::hasRole('admin')) {
+      return response()->json(['message' => 'insufficient_permissions']);
+    }
+
+    $validator = Validator::make($request->all(), [
+      'mode' => 'required|in:accepted_only,waitlisted_okay',
+    ]);
+    if ($validator->fails()) {
+        return response()->json(['message' => 'validation', 'errors' => $validator->errors()],400);
+    }
+
+    switch($request->mode) {
+      case "accepted_only":
+        ExecController::putSetting('checkin_mode',"accepted_only");
+        break;
+      case "waitlisted_okay":
+        ExecController::putSetting('checkin_mode',"waitlisted_okay");
+        break;
+      default:
+        return response()->json(['message' => 'unknown mode'],400);
+    }
+    return response()->json(['message' => 'success', 'mode' => ExecController::getSetting('checkin_mode')],200);
+  }
 
   public function getCheckinMode() {
     //User must be an admin to see this information
