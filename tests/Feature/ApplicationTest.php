@@ -9,6 +9,7 @@ use Illuminate\Foundation\Testing\DatabaseTransactions;
 use App\Models\User;
 use App\Models\Role;
 use App\Models\Application;
+use App\Http\Controllers\ExecController;
 
 class ApplicationTest extends TestCase
 {
@@ -49,6 +50,7 @@ class ApplicationTest extends TestCase
     $this->adminUser = User::where('email','noreply1@purdue.edu')->first();
     $this->adminUser->roles()->attach(Role::where('name','admin')->first()->id);
     $this->adminUser->roles()->attach(Role::where('name','devteam')->first()->id);
+    ExecController::putSetting('application_mode','open');
   }
 
   public function buildValidApp() {
@@ -102,14 +104,15 @@ class ApplicationTest extends TestCase
     $this->assertDatabaseMissing('applications',['user_id' => $this->user->id]);
 
     //Check that application fails if they're closed
-    putenv("APPLICATION_MODE=CLOSED");
+    // putenv("APPLICATION_MODE=CLOSED");
+    ExecController::putSetting('application_mode','closed');
     $appData = ApplicationTest::buildValidApp();
     $this->actingAs($this->user)
     ->post('api/user/apply',$appData,
     ['Authorization' => 'Bearer '.$this->token])
     ->assertJsonFragment(['message' => 'validation','application_mode' => ['Applications are not open']]);
     $this->assertDatabaseMissing('applications',['user_id' => $this->user->id]);
-    putenv("APPLICATION_MODE=OPEN");
+    ExecController::putSetting('application_mode','open');
 
 
     //Check valid application
