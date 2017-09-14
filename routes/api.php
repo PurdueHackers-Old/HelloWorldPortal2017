@@ -58,6 +58,9 @@ Route::group(['middleware' => 'jwt.auth'], function() {
 	Route::post('/exec/publishStatus', 'ExecController@publishApplicationStatus');
 	Route::get('/exec/statistics', 'ExecController@getStatistics');
 	Route::get('/exec/nextApplication', 'ExecController@getNextApp');
+	Route::get('/exec/admins', 'ExecController@getAdminList');
+	Route::post('/exec/removeAdmin', 'ExecController@revokeAdminStatus');
+	Route::post('/exec/addAdmin', 'ExecController@addAdminStatus');
 	Route::post('user/search', 'AuthController@getEmailSuggestions');
 	Route::get('user/interest', 'AuthController@getInterestSignups');
 });

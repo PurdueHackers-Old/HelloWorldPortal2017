@@ -15,6 +15,8 @@ use Carbon\Carbon;
 use Log;
 use Storage;
 use DB;
+Use App\Models\Role;
+
 
 class ExecController extends Controller
 {
@@ -303,5 +305,63 @@ class ExecController extends Controller
     }
     $setting->value = $settingValue;
     $setting->save();
+  }
+
+  public static function getAdminList(Request $request) {
+    //User must be on devteam to check someone in
+    if(!PermissionsController::hasRole('devteam')) {
+      return response()->json(['message' => 'insufficient_permissions']);
+    }
+    //Return a list of all admins
+    $adminRole = Role::where('name','admin')->first();
+    return response()->json(['message' => 'success', 'admins' => $adminRole->users]);
+  }
+
+  public static function addAdminStatus(Request $request) {
+    //User must be on devteam
+    if(!PermissionsController::hasRole('devteam')) {
+      return response()->json(['message' => 'insufficient_permissions']);
+    }
+
+    $validator = Validator::make($request->all(), [
+      'email' => 'required|exists:users',
+    ]);
+    if ($validator->fails()) {
+        return response()->json(['message' => 'validation', 'errors' => $validator->errors()],400);
+    }
+
+    $user = User::where('email',$request->email)->first();
+    $adminRole = Role::where('name','admin')->first();
+
+    //Does this person already have the role?
+    if($user->roles->contains($adminRole->id)) {
+      //This user is already an admin
+      return response()->json(['message' => 'error', 'status' => 'User is already admin'],400);
+    } else {
+      //Add admin role
+      $user->roles()->attach($adminRole);
+      return response()->json(['message' => 'success', 'admins' => $adminRole->users]);
+    }
+
+  }
+
+  public static function revokeAdminStatus(Request $request) {
+    //User must be on devteam
+    if(!PermissionsController::hasRole('devteam')) {
+      return response()->json(['message' => 'insufficient_permissions']);
+    }
+
+    $validator = Validator::make($request->all(), [
+      'email' => 'required|exists:users',
+    ]);
+    if ($validator->fails()) {
+        return response()->json(['message' => 'validation', 'errors' => $validator->errors()],400);
+    }
+
+    //Remove amdin role
+    $user = User::where('email',$request->email)->first();
+    $adminRole = Role::where('name','admin')->first();
+    $user->roles()->detach($adminRole);
+    return response()->json(['message' => 'success', 'admins' => $adminRole->users]);
   }
 }
