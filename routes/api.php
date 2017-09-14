@@ -52,6 +52,7 @@ Route::group(['middleware' => 'jwt.auth'], function() {
 	Route::get('/exec/checkinmode', 'ExecController@getCheckinMode');
 	Route::post('/exec/checkinmode', 'ExecController@updateCheckinMode');
 	Route::post('/exec/checkin', 'ExecController@checkinUser');
+	Route::post('/applications/mode', 'ExecController@updateApplicationMode');
 
 	Route::post('/exec/removeCheckin', 'ExecController@removeCheckedInUser');
 	Route::post('/exec/publishStatus', 'ExecController@publishApplicationStatus');

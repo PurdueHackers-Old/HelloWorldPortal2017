@@ -51,7 +51,7 @@ class PermissionsController extends Controller
   }
 
   public static function checkApplicationMode($mode) {
-    $currentMode = getenv('APPLICATION_MODE');
+    $currentMode = ExecController::getSetting('application_mode');
     if($currentMode == false) {
       return false;
     } else {

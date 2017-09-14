@@ -270,14 +270,21 @@ class ApplicationController extends Controller
   }
 
   public function getApplicationMode() {
-    switch(getenv('APPLICATION_MODE')) {
-      case "INTEREST":
+    $appMode = ExecController::getSetting('application_mode');
+    if(!$appMode) {
+      //Store a default value
+      $appMode = "interest";
+      ExecController::putSetting('application_mode','interest');
+    }
+
+    switch($appMode) {
+      case "interest":
         return response()->json(['message' => 'success', 'status' => 'interest']);
-      case "OPEN":
+      case "open":
         return response()->json(['message' => 'success', 'status' => 'open']);
-      case "CLOSED":
+      case "closed":
         return response()->json(['message' => 'success', 'status' => 'closed']);
-      case "DAY_OF":
+      case "dayof":
         return response()->json(['message' => 'success', 'status' => 'dayof']);
       default:
         return response()->json(['message' => 'error', 'status' => 'Unknown application mode'],400);

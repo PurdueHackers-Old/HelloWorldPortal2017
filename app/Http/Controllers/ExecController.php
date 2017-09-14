@@ -244,6 +244,38 @@ class ExecController extends Controller
     return response()->json(['message' => 'success', 'mode' => ExecController::getSetting('checkin_mode')],200);
   }
 
+  public function updateApplicationMode(Request $request) {
+    //User must have devteam permissions to change this mode
+    if(!PermissionsController::hasRole('devteam')) {
+      return response()->json(['message' => 'insufficient_permissions']);
+    }
+
+    $validator = Validator::make($request->all(), [
+      'mode' => 'required|in:interest,open,closed,dayof',
+    ]);
+    if ($validator->fails()) {
+        return response()->json(['message' => 'validation', 'errors' => $validator->errors()],400);
+    }
+
+    switch($request->mode) {
+      case "interest":
+        ExecController::putSetting('application_mode',"interest");
+        break;
+      case "open":
+        ExecController::putSetting('application_mode',"open");
+        break;
+      case "closed":
+        ExecController::putSetting('application_mode',"closed");
+        break;
+      case "dayof":
+        ExecController::putSetting('application_mode',"dayof");
+        break;
+      default:
+        return response()->json(['message' => 'unknown mode'],400);
+    }
+    return response()->json(['message' => 'success', 'mode' => ExecController::getSetting('application_mode')],200);
+  }
+
   public function getCheckinMode() {
     //User must be an admin to see this information
     if(!PermissionsController::hasRole('admin')) {
