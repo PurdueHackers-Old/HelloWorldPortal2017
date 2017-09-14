@@ -82,7 +82,13 @@ class ApplicationController extends Controller
       $resume->uuid = Uuid::generate();
       $resume->filename_original = $fileHandle->getClientOriginalName();
       $resume->save();
+    } else {
+      //Resume already exists, just update filename
+      $resume->filename_original = $fileHandle->getClientOriginalName();
+      $resume->save();
     }
+
+    //Store the file
     $path = $resume->getResumePath();
     Storage::put($path, file_get_contents($fileHandle));
   }
