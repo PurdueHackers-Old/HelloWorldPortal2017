@@ -21,7 +21,7 @@ class DownloadResumes extends Command
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'Download resumes from AWS into /storage/app/copied_resumes';
 
     /**
      * Create a new command instance.

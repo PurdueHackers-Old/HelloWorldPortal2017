@@ -25,7 +25,7 @@ class ProcessResumes extends Command
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'Process resumes in /storage/app/copied_resumes to /storage/app/cleaned_resumes';
 
     /**
      * Create a new command instance.
